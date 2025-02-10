@@ -30,20 +30,23 @@ public class UserController {
     private Long currentId = 0L;
 
     @PostMapping()
-    public String createUser(@Valid @RequestBody UserDto userDto, BindingResult bindingResult) {
+    public User createUser(@Valid @RequestBody UserDto userDto, BindingResult bindingResult) {
+//        if (bindingResult.hasErrors()){
+//            return bindingResult.getAllErrors().stream().map(error -> error.getDefaultMessage())
+//                    .collect(Collectors.joining(" "));
+//        }
         if (bindingResult.hasErrors()){
-            return bindingResult.getAllErrors().stream().map(error -> error.getDefaultMessage())
-                    .collect(Collectors.joining(" "));
+            throw new IllegalArgumentException("Неверные параметры");
         }
         User user;
-        try {
+//        try {
             userDto.setId(currentId++);
             user = mapToUser(userDto);
-        }catch (DateTimeParseException e){
-            return "Такой даты не сущесвует.";
-        }
+//        }catch (DateTimeParseException e){
+//            return "Такой даты не сущесвует.";
+//        }
         userMap.put(user.getId(), user);
-        return "Пользователь  был создан: " + user.toString();
+        return user;
     }
 
     @PutMapping()
