@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/films")
 public class FilmController {
     private final Logger log = LoggerFactory.getLogger(FilmController.class);
-    private static final LocalDate CHECK_DATE = LocalDate.of(1895, 12, 28);
+    private static final LocalDate checkDate = LocalDate.of(1895, 12, 28);
     private final Map<Long, Film> filmMap = new HashMap<>();
-    private static final DateTimeFormatter FORMATER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private Long currentId = 1L;
 
     @PostMapping()
@@ -105,16 +105,16 @@ public class FilmController {
 
         LocalDate date;
         try {
-            date = LocalDate.parse(filmDto.getReleaseDate(), FORMATER);
+            date = LocalDate.parse(filmDto.getReleaseDate(), formater);
             log.info("Дата релиза успешно распаршена: {}", date);
         } catch (DateTimeParseException e) {
             log.error("Ошибка парсинга даты релиза: {}", e.getMessage());
             throw e;
         }
 
-        if (date.isBefore(CHECK_DATE)) {
+        if (date.isBefore(checkDate)) {
             log.error("Дата релиза раньше допустимой: {}", date);
-            throw new DateIsToOldException("Дата не должна быть раньше " + CHECK_DATE.format(FORMATER));
+            throw new DateIsToOldException("Дата не должна быть раньше " + checkDate.format(formater));
         }
 
         Duration duration = Duration.ofMinutes(filmDto.getDuration());
@@ -139,7 +139,7 @@ public class FilmController {
                 .id(film.getId())
                 .description(film.getDescription())
                 .name(film.getName())
-                .releaseDate(film.getReleaseDate().format(FORMATER))
+                .releaseDate(film.getReleaseDate().format(formater))
                 .duration(film.getDuration().getSeconds() / 60)
                 .build();
 

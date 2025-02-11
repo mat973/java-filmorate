@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class UserController {
     private final static Logger log = LoggerFactory.getLogger(UserController.class);
     private Map<Long, User> userMap = new HashMap<>();
-    private static final DateTimeFormatter FORMATER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private Long currentId = 1L;
 
     @PostMapping()
@@ -108,7 +108,7 @@ public class UserController {
         }
 
         log.info("Парсинг даты рождения: {}", userDto.getBirthday());
-        LocalDate birthday = LocalDate.parse(userDto.getBirthday(), FORMATER);
+        LocalDate birthday = LocalDate.parse(userDto.getBirthday(), formater);
 
         if (birthday.isAfter(LocalDate.now())) {
             log.error("Дата рождения не может быть позже текущей даты: {}", birthday);
