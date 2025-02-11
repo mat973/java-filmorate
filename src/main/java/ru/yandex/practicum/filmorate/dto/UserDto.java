@@ -15,7 +15,7 @@ public class UserDto {
     @NotBlank(message = "Логин не должен быть пустым.")
     private String login;
     private String name;
-    @NotNull(message = "Дата не должна быть пустая")
-    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Дата должна быть в формате yyyy-MM-dd")
+    @NotNull(message = "Дата не должна быть пустая.")
+    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Дата должна быть в формате yyyy-MM-dd.")
     private String birthday;
 }
