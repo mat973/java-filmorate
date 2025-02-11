@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/films")
 public class FilmController {
     private final Logger log = LoggerFactory.getLogger(FilmController.class);
-    private static final LocalDate checkDate = LocalDate.of(1895, 12, 28);
+    private final LocalDate checkDate = LocalDate.of(1895, 12, 28);
     private final Map<Long, Film> filmMap = new HashMap<>();
-    private static final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private Long currentId = 1L;
 
     @PostMapping()
