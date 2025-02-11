@@ -26,7 +26,7 @@ public class FilmController {
     private final Logger log = LoggerFactory.getLogger(FilmController.class);
     private static final LocalDate CHECK_DATE = LocalDate.of(1895, 12, 28);
     private final Map<Long, Film> filmMap = new HashMap<>();
-    private final static DateTimeFormatter FORMATER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter FORMATER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private Long currentId = 1L;
 
     @PostMapping()
