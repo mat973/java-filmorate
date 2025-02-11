@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final static Logger log = LoggerFactory.getLogger(UserController.class);
+    private final Logger log = LoggerFactory.getLogger(UserController.class);
     private final Map<Long, User> userMap = new HashMap<>();
     private final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private Long currentId = 1L;
