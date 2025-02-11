@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class UserController {
     private final static Logger log = LoggerFactory.getLogger(UserController.class);
     private Map<Long, User> userMap = new HashMap<>();
-    private final DateTimeFormatter FORMATER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final static DateTimeFormatter FORMATER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private Long currentId = 1L;
 
     @PostMapping()
