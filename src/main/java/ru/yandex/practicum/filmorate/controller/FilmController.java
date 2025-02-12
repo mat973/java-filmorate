@@ -34,11 +34,7 @@ public class FilmController {
         log.debug("Начало обработки запроса на создание фильма: {}", filmDto);
 
         if (bindingResult.hasErrors()) {
-            String errorMessage = bindingResult.getAllErrors().stream()
-                    .map(error -> error.getDefaultMessage())
-                    .collect(Collectors.joining(" "));
-            log.warn("Ошибка валидации при создании фильма: {}", errorMessage);
-            return new ResponseEntity<>(new ExceptionDto(errorMessage), HttpStatus.BAD_REQUEST);
+            return getException(bindingResult);
         }
 
         Film film;
@@ -46,16 +42,12 @@ public class FilmController {
             filmDto.setId(currentId++);
             film = mapToFilm(filmDto);
             log.info("Фильм успешно создан: {}", film);
-        } catch (DateTimeParseException e) {
-            log.error("Ошибка парсинга даты релиза: {}", e.getMessage());
-            return new ResponseEntity<>(new ExceptionDto("Такой даты не существует."), HttpStatus.BAD_REQUEST);
-        } catch (DateIsToOldException e) {
+        } catch (RuntimeException e) {
             log.error("Ошибка при создании фильма: {}", e.getMessage());
             return new ResponseEntity<>(new ExceptionDto(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
 
         filmMap.put(film.getId(), film);
-        log.trace("Фильм добавлен в хранилище. Текущее количество фильмов: {}", filmMap.size());
         return ResponseEntity.ok(mapToFilDto(film));
     }
 
@@ -64,11 +56,7 @@ public class FilmController {
         log.debug("Начало обработки запроса на обновление фильма: {}", filmDto);
 
         if (bindingResult.hasErrors()) {
-            String errorMessage = bindingResult.getAllErrors().stream()
-                    .map(error -> error.getDefaultMessage())
-                    .collect(Collectors.joining(" "));
-            log.warn("Ошибка валидации при обновлении фильма: {}", errorMessage);
-            return new ResponseEntity<>(new ExceptionDto(errorMessage), HttpStatus.BAD_REQUEST);
+            return getException(bindingResult);
         }
 
         Long id = filmDto.getId();
@@ -96,29 +84,17 @@ public class FilmController {
     @GetMapping()
     public ResponseEntity<?> getAllFilms() {
         log.debug("Запрос на получение списка всех фильмов");
-        log.trace("Текущее количество фильмов: {}", filmMap.size());
         return ResponseEntity.ok(filmMap.values().stream().map(this::mapToFilDto).toList());
     }
 
     private Film mapToFilm(FilmDto filmDto) {
         log.debug("Начало преобразования FilmDto в Film: {}", filmDto);
-
-        LocalDate date;
-        try {
-            date = LocalDate.parse(filmDto.getReleaseDate(), formater);
-            log.info("Дата релиза успешно распаршена: {}", date);
-        } catch (DateTimeParseException e) {
-            log.error("Ошибка парсинга даты релиза: {}", e.getMessage());
-            throw e;
-        }
-
+        LocalDate date = LocalDate.parse(filmDto.getReleaseDate(), formater);
         if (date.isBefore(checkDate)) {
             log.error("Дата релиза раньше допустимой: {}", date);
             throw new DateIsToOldException("Дата не должна быть раньше " + checkDate.format(formater));
         }
-
         Duration duration = Duration.ofMinutes(filmDto.getDuration());
-        log.trace("Длительность фильма преобразована в Duration: {}", duration);
 
         Film film = Film.builder()
                 .id(filmDto.getId())
@@ -127,14 +103,10 @@ public class FilmController {
                 .name(filmDto.getName())
                 .releaseDate(date)
                 .build();
-
-        log.trace("Фильм успешно преобразован: {}", film);
         return film;
     }
 
     private FilmDto mapToFilDto(Film film) {
-        log.trace("Начало преобразования Film в FilmDto: {}", film);
-
         FilmDto filmDto = FilmDto.builder()
                 .id(film.getId())
                 .description(film.getDescription())
@@ -143,7 +115,15 @@ public class FilmController {
                 .duration(film.getDuration().getSeconds() / 60)
                 .build();
 
-        log.trace("FilmDto успешно создан: {}", filmDto);
         return filmDto;
+    }
+
+
+    private ResponseEntity<?> getException(BindingResult bindingResult) {
+        String errorMessage = bindingResult.getAllErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.joining(" "));
+        log.warn("Ошибка валидации при создании фильма: {}", errorMessage);
+        return new ResponseEntity<>(new ExceptionDto(errorMessage), HttpStatus.BAD_REQUEST);
     }
 }

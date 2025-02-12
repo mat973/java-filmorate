@@ -33,11 +33,7 @@ public class UserController {
         log.debug("Начало обработки запроса на создание пользователя: {}", userDto);
 
         if (bindingResult.hasErrors()) {
-            String errorMessage = bindingResult.getAllErrors().stream()
-                    .map(error -> error.getDefaultMessage())
-                    .collect(Collectors.joining(" "));
-            log.warn("Ошибка валидации при создании пользователя: {}", errorMessage);
-            return new ResponseEntity<>(new ExceptionDto(errorMessage), HttpStatus.BAD_REQUEST);
+            return getException(bindingResult);
         }
 
         User user;
@@ -54,7 +50,6 @@ public class UserController {
         }
 
         userMap.put(user.getId(), user);
-        log.trace("Пользователь добавлен в хранилище. Текущее количество пользователей: {}", userMap.size());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
@@ -63,11 +58,7 @@ public class UserController {
         log.debug("Начало обработки запроса на обновление пользователя: {}", userDto);
 
         if (bindingResult.hasErrors()) {
-            String errorMessage = bindingResult.getAllErrors().stream()
-                    .map(error -> error.getDefaultMessage())
-                    .collect(Collectors.joining(" "));
-            log.warn("Ошибка валидации при обновлении пользователя: {}", errorMessage);
-            return new ResponseEntity<>(new ExceptionDto(errorMessage), HttpStatus.BAD_REQUEST);
+            return getException(bindingResult);
         }
 
         Long id = userDto.getId();
@@ -95,13 +86,10 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<?> getAllUsers() {
         log.debug("Запрос на получение списка всех пользователей");
-        log.trace("Текущее количество пользователей: {}", userMap.size());
         return new ResponseEntity<>(userMap.values().stream().toList(), HttpStatus.OK);
     }
 
     private User mapToUser(UserDto userDto) {
-        log.debug("Начало преобразования UserDto в User: {}", userDto);
-
         if (containSpace(userDto.getLogin())) {
             log.warn("Логин содержит пробелы: {}", userDto.getLogin());
             throw new LoginContainSpaceException();
@@ -128,12 +116,10 @@ public class UserController {
                 .birthday(birthday)
                 .build();
 
-        log.trace("Пользователь успешно преобразован: {}", user);
         return user;
     }
 
     private boolean containSpace(String s) {
-        log.trace("Проверка строки на наличие пробелов: {}", s);
         for (char c : s.toCharArray()) {
             if (c == ' ') {
                 log.debug("Найден пробел в строке: {}", s);
@@ -141,5 +127,13 @@ public class UserController {
             }
         }
         return false;
+    }
+
+    private ResponseEntity<?> getException(BindingResult bindingResult) {
+        String errorMessage = bindingResult.getAllErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.joining(" "));
+        log.warn("Ошибка валидации при создании фильма: {}", errorMessage);
+        return new ResponseEntity<>(new ExceptionDto(errorMessage), HttpStatus.BAD_REQUEST);
     }
 }
