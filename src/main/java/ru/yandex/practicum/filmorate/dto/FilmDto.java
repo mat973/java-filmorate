@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Set;
+
 @Data
 @Builder
 public class FilmDto {
@@ -18,4 +20,6 @@ public class FilmDto {
     @NotNull(message = "Продолжительность не можеть быть пустой.")
     @Positive
     private Long duration;
+
+    private Set<Long> likes ;
 }

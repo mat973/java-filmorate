@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -11,119 +12,77 @@ import ru.yandex.practicum.filmorate.dto.ExceptionDto;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exeption.DateIsToOldException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/films")
 public class FilmController {
     private final Logger log = LoggerFactory.getLogger(FilmController.class);
-    private final LocalDate checkDate = LocalDate.of(1895, 12, 28);
-    private final Map<Long, Film> filmMap = new HashMap<>();
-    private final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private Long currentId = 1L;
+    @Autowired
+    private FilmService filmService;
 
     @PostMapping()
-    public ResponseEntity<?> createFilm(@Valid @RequestBody FilmDto filmDto, BindingResult bindingResult) {
+    @ResponseStatus(HttpStatus.OK)
+    public FilmDto createFilm(@Valid @RequestBody FilmDto filmDto) {
         log.debug("Начало обработки запроса на создание фильма: {}", filmDto);
+        return filmService.createFilm(filmDto);
 
-        if (bindingResult.hasErrors()) {
-            return getException(bindingResult);
-        }
-
-        Film film;
-        try {
-            filmDto.setId(currentId++);
-            film = mapToFilm(filmDto);
-            log.info("Фильм успешно создан: {}", film);
-        } catch (RuntimeException e) {
-            log.error("Ошибка при создании фильма: {}", e.getMessage());
-            return new ResponseEntity<>(new ExceptionDto(e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
-
-        filmMap.put(film.getId(), film);
-        return ResponseEntity.ok(mapToFilDto(film));
     }
 
     @PutMapping()
-    public ResponseEntity<?> updateFilm(@Valid @RequestBody FilmDto filmDto, BindingResult bindingResult) {
+    @ResponseStatus(HttpStatus.OK)
+    public FilmDto updateFilm(@Valid @RequestBody FilmDto filmDto) {
         log.debug("Начало обработки запроса на обновление фильма: {}", filmDto);
 
-        if (bindingResult.hasErrors()) {
-            return getException(bindingResult);
-        }
+        return filmService.updateFilm(filmDto);
 
-        Long id = filmDto.getId();
-        if (id == null || !filmMap.containsKey(id)) {
-            String errorMessage = "Фильм " + (id == null ? "должен иметь id." : "с id " + id + " не существует.");
-            log.warn("Ошибка при обновлении фильма: {}", errorMessage);
-            return new ResponseEntity<>(new ExceptionDto(errorMessage), HttpStatus.NOT_FOUND);
-        }
-
-        Film film;
-        try {
-            film = mapToFilm(filmDto);
-            log.info("Фильм успешно обновлён: {}", film);
-        } catch (DateTimeParseException e) {
-            log.error("Ошибка парсинга даты релиза: {}", e.getMessage());
-            return new ResponseEntity<>(new ExceptionDto("Такой даты не существует."), HttpStatus.BAD_REQUEST);
-        } catch (DateIsToOldException e) {
-            log.error("Ошибка при обновлении фильма: {}", e.getMessage());
-            return new ResponseEntity<>(new ExceptionDto(e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
-
-        return ResponseEntity.ok(mapToFilDto(film));
     }
 
     @GetMapping()
-    public ResponseEntity<?> getAllFilms() {
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> getAllFilms() {
         log.debug("Запрос на получение списка всех фильмов");
-        return ResponseEntity.ok(filmMap.values().stream().map(this::mapToFilDto).toList());
+        return filmService.getAllFilms();
     }
 
-    private Film mapToFilm(FilmDto filmDto) {
-        log.debug("Начало преобразования FilmDto в Film: {}", filmDto);
-        LocalDate date = LocalDate.parse(filmDto.getReleaseDate(), formater);
-        if (date.isBefore(checkDate)) {
-            log.error("Дата релиза раньше допустимой: {}", date);
-            throw new DateIsToOldException("Дата не должна быть раньше " + checkDate.format(formater));
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public FilmDto getFilmById(@PathVariable Long id){
+        log.debug("Запрос на получение фильма с id: {}", id);
+        return filmService.getFilmById(id);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void addLike(@PathVariable Long id, @PathVariable Long userId){
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteLike(@PathVariable Long id, @PathVariable Long userId){
+        filmService.deleteLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    @ResponseStatus(HttpStatus.OK)
+    public List<FilmDto> getPopularFilms(@RequestParam Optional<Integer> count){
+        Integer countt;
+        if (count.isEmpty()){
+            countt = 10;
+        }else {
+            countt = count.get();
         }
-        Duration duration = Duration.ofMinutes(filmDto.getDuration());
+        return filmService.getPopularFilms(countt);
 
-        Film film = Film.builder()
-                .id(filmDto.getId())
-                .description(filmDto.getDescription())
-                .duration(duration)
-                .name(filmDto.getName())
-                .releaseDate(date)
-                .build();
-        return film;
-    }
-
-    private FilmDto mapToFilDto(Film film) {
-        FilmDto filmDto = FilmDto.builder()
-                .id(film.getId())
-                .description(film.getDescription())
-                .name(film.getName())
-                .releaseDate(film.getReleaseDate().format(formater))
-                .duration(film.getDuration().getSeconds() / 60)
-                .build();
-
-        return filmDto;
     }
 
 
-    private ResponseEntity<?> getException(BindingResult bindingResult) {
-        String errorMessage = bindingResult.getAllErrors().stream()
-                .map(error -> error.getDefaultMessage())
-                .collect(Collectors.joining(" "));
-        log.warn("Ошибка валидации при создании фильма: {}", errorMessage);
-        return new ResponseEntity<>(new ExceptionDto(errorMessage), HttpStatus.BAD_REQUEST);
-    }
 }
