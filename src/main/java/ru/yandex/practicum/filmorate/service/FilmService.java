@@ -3,23 +3,17 @@ package ru.yandex.practicum.filmorate.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dto.ExceptionDto;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
-import ru.yandex.practicum.filmorate.exeption.DateNotExistException;
 import ru.yandex.practicum.filmorate.exeption.DateIsToOldException;
 import ru.yandex.practicum.filmorate.exeption.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exeption.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -57,27 +51,24 @@ public class FilmService {
     }
 
 
-
-
-
     public List<Film> getAllFilms() {
         return inMemoryFilmStorage.getAllFilms();
     }
 
     public FilmDto getFilmById(Long id) {
         Optional<Film> film = inMemoryFilmStorage.find(id);
-        if (film.isEmpty()){
+        if (film.isEmpty()) {
             throw new FilmNotFoundException("Фильм с id: " + id + " не удалось найти :(");
         }
         return mapToFilDto(film.get());
     }
 
     public void addLike(Long id, Long userId) {
-        if (userId == null || userService.contain(userId)){
-            throw  new UserNotFoundException("Пользователя с id: " + userId + " не удалось найти :(");
+        if (userId == null || !userService.contain(userId)) {
+            throw new UserNotFoundException("Пользователя с id: " + userId + " не удалось найти :(");
         }
-        if (id == null || inMemoryFilmStorage.find(id).isEmpty()){
-            throw  new FilmNotFoundException("Фильм с id: " + id + " не удалось найти :(");
+        if (id == null || inMemoryFilmStorage.find(id).isEmpty()) {
+            throw new FilmNotFoundException("Фильм с id: " + id + " не удалось найти :(");
         }
 
         inMemoryFilmStorage.find(id).get().getLikes().add(userId);
@@ -85,11 +76,11 @@ public class FilmService {
     }
 
     public void deleteLike(Long id, Long userId) {
-        if (userId == null || userService.contain(userId)){
-            throw  new UserNotFoundException("Пользователя не может быть с пустым id");
+        if (userId == null || !userService.contain(userId)) {
+            throw new UserNotFoundException("Пользователя не может быть с пустым id");
         }
-        if (id == null || inMemoryFilmStorage.find(id).isEmpty()){
-            throw  new FilmNotFoundException("Фильм с id: " + id + " не удалось найти :(");
+        if (id == null || inMemoryFilmStorage.find(id).isEmpty()) {
+            throw new FilmNotFoundException("Фильм с id: " + id + " не удалось найти :(");
         }
 
         inMemoryFilmStorage.find(id).get().getLikes().remove(userId);
@@ -97,7 +88,7 @@ public class FilmService {
 
     public List<FilmDto> getPopularFilms(Integer count) {
         return inMemoryFilmStorage.getAllFilms().stream()
-                .sorted(Comparator.comparingInt( (Film x) -> x.getLikes().size()).reversed())
+                .sorted(Comparator.comparingInt((Film x) -> x.getLikes().size()).reversed())
                 .limit(count)
                 .map(this::mapToFilDto)
                 .collect(Collectors.toList());

@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.*;
 
 @Component
-public class InMemoryFilmStorage implements FilmStorage{
+public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> filmMap = new HashMap<>();
     private Long currentId = 1L;
 
@@ -26,7 +26,7 @@ public class InMemoryFilmStorage implements FilmStorage{
 
     @Override
     public Optional<Film> find(Long id) {
-        if (!filmMap.containsKey(id)){
+        if (!filmMap.containsKey(id)) {
             return Optional.empty();
         }
         return Optional.of(filmMap.get(id));

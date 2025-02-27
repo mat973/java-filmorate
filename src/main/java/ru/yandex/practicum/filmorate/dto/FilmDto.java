@@ -21,5 +21,5 @@ public class FilmDto {
     @Positive
     private Long duration;
 
-    private Set<Long> likes ;
+    private Set<Long> likes;
 }

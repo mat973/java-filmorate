@@ -16,42 +16,42 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionDto handleUserNotFoundException(final UserNotFoundException e){
+    public ExceptionDto handleUserNotFoundException(final UserNotFoundException e) {
         return new ExceptionDto(e.getMessage());
     }
 
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionDto handleFilmNotFoundException(final FilmNotFoundException e){
+    public ExceptionDto handleFilmNotFoundException(final FilmNotFoundException e) {
         return new ExceptionDto(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto handleDateIsToOldException(final DateIsToOldException e){
+    public ExceptionDto handleDateIsToOldException(final DateIsToOldException e) {
         return new ExceptionDto(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto handleDateNotExistException(final DateNotExistException e){
+    public ExceptionDto handleDateNotExistException(final DateNotExistException e) {
         return new ExceptionDto(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto handleLoginContainSpaceException (final LoginContainSpaceException e){
+    public ExceptionDto handleLoginContainSpaceException(final LoginContainSpaceException e) {
         return new ExceptionDto(e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto handleLoginContainSpaceException (final MethodArgumentNotValidException e){
-        String result  = e.getBindingResult().getAllErrors().stream()
+    public ExceptionDto handleLoginContainSpaceException(final MethodArgumentNotValidException e) {
+        String result = e.getBindingResult().getAllErrors().stream()
                 .filter(ex -> ex instanceof FieldError)
-                .map(ex -> (FieldError)ex)
-                .map(ex -> "В поле " + ex.getField() + " возникла ошибка: "+ ex.getDefaultMessage())
+                .map(ex -> (FieldError) ex)
+                .map(ex -> "В поле " + ex.getField() + " возникла ошибка: " + ex.getDefaultMessage())
                 .collect(Collectors.joining(", "));
         return new ExceptionDto(result);
     }
@@ -59,7 +59,7 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto handleFriendsException (final FriendsException e){
+    public ExceptionDto handleFriendsException(final FriendsException e) {
         return new ExceptionDto(e.getMessage());
     }
 }
