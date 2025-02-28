@@ -37,7 +37,8 @@ public class InMemoryUserStorage implements UserStorage {
         return userMap.values().stream().toList();
     }
 
-    public boolean containUser(Long id) {
+    public boolean existById(Long id) {
         return userMap.containsKey(id);
     }
+
 }

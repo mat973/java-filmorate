@@ -35,4 +35,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     public List<Film> getAllFilms() {
         return filmMap.values().stream().toList();
     }
+
+    public boolean existById(Long id) {
+        return filmMap.containsKey(id);
+    }
 }

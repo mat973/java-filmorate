@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exeption.DateIsToOldException;
@@ -16,20 +16,18 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FilmService {
-    @Autowired
-    private InMemoryFilmStorage inMemoryFilmStorage;
-    @Autowired
-    private UserService userService;
+
+    private final InMemoryFilmStorage inMemoryFilmStorage;
+    private final UserService userService;
+
     private final Logger log = LoggerFactory.getLogger(FilmService.class);
     private final LocalDate checkDate = LocalDate.of(1895, 12, 28);
-
     private final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
 
     public FilmDto createFilm(FilmDto filmDto) {
         Film film = inMemoryFilmStorage.save(mapToFilm(filmDto));
@@ -38,14 +36,15 @@ public class FilmService {
 
     public FilmDto updateFilm(FilmDto filmDto) {
         Long id = filmDto.getId();
-        if (id == null || inMemoryFilmStorage.find(id).isEmpty()) {
+        if (id == null || !inMemoryFilmStorage.existById(id)) {
             String errorMessage = "Фильм " + (id == null ? "должен иметь id." : "с id " + id + " не существует.");
             throw new FilmNotFoundException(errorMessage);
         }
-        Film oldFilm = inMemoryFilmStorage.find(filmDto.getId()).get();
+        Film oldFilm = inMemoryFilmStorage.find(filmDto.getId()).orElseThrow(() -> new FilmNotFoundException(
+                "Фильм с id: " + id + " не найден."
+        ));
         Film newFilm = mapToFilm(filmDto);
         newFilm.setLikes(oldFilm.getLikes());
-
 
         return mapToFilDto(inMemoryFilmStorage.update(newFilm));
     }
@@ -56,34 +55,35 @@ public class FilmService {
     }
 
     public FilmDto getFilmById(Long id) {
-        Optional<Film> film = inMemoryFilmStorage.find(id);
-        if (film.isEmpty()) {
-            throw new FilmNotFoundException("Фильм с id: " + id + " не удалось найти :(");
-        }
-        return mapToFilDto(film.get());
+        Film film = inMemoryFilmStorage.find(id)
+                .orElseThrow(() -> new FilmNotFoundException("Фильм с id:" + id + "не удалось найти :("));
+        return mapToFilDto(film);
     }
 
     public void addLike(Long id, Long userId) {
         if (userId == null || !userService.contain(userId)) {
             throw new UserNotFoundException("Пользователя с id: " + userId + " не удалось найти :(");
         }
-        if (id == null || inMemoryFilmStorage.find(id).isEmpty()) {
+        if (id == null || !inMemoryFilmStorage.existById(id)) {
             throw new FilmNotFoundException("Фильм с id: " + id + " не удалось найти :(");
         }
 
-        inMemoryFilmStorage.find(id).get().getLikes().add(userId);
-
+        inMemoryFilmStorage.find(id)
+                .orElseThrow(() -> new FilmNotFoundException("Фильм с id: " + id + " не найден."))
+                .getLikes().add(userId);
     }
 
     public void deleteLike(Long id, Long userId) {
         if (userId == null || !userService.contain(userId)) {
             throw new UserNotFoundException("Пользователя не может быть с пустым id");
         }
-        if (id == null || inMemoryFilmStorage.find(id).isEmpty()) {
+        if (id == null || !inMemoryFilmStorage.existById(id)) {
             throw new FilmNotFoundException("Фильм с id: " + id + " не удалось найти :(");
         }
 
-        inMemoryFilmStorage.find(id).get().getLikes().remove(userId);
+        inMemoryFilmStorage.find(id)
+                .orElseThrow(() -> new FilmNotFoundException("Фильм с id: " + id + " не найден."))
+                .getLikes().remove(userId);
     }
 
     public List<FilmDto> getPopularFilms(Integer count) {
@@ -102,19 +102,19 @@ public class FilmService {
         }
         Duration duration = Duration.ofMinutes(filmDto.getDuration());
 
-        Film film = Film.builder()
+        return Film.builder()
                 .id(filmDto.getId())
                 .description(filmDto.getDescription())
                 .duration(duration)
                 .name(filmDto.getName())
                 .releaseDate(date)
                 .build();
-        return film;
     }
 
 
     private FilmDto mapToFilDto(Film film) {
-        FilmDto filmDto = FilmDto.builder()
+
+        return FilmDto.builder()
                 .id(film.getId())
                 .description(film.getDescription())
                 .name(film.getName())
@@ -122,7 +122,5 @@ public class FilmService {
                 .duration(film.getDuration().getSeconds() / 60)
                 .likes(film.getLikes())
                 .build();
-
-        return filmDto;
     }
 }

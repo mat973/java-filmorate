@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exeption.DateNotExistException;
@@ -17,16 +17,16 @@ import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final Logger log = LoggerFactory.getLogger(UserService.class);
     private final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    @Autowired
-    private InMemoryUserStorage inMemoryUserStorage;
+
+    private final InMemoryUserStorage inMemoryUserStorage;
 
     public User createUser(UserDto userDto) {
         return inMemoryUserStorage.save(mapToUser(userDto));
@@ -34,16 +34,17 @@ public class UserService {
 
     public User upDateUser(@Valid UserDto userDto) {
         Long id = userDto.getId();
-        if (id == null || inMemoryUserStorage.find(id).isEmpty()) {
+        if (id == null || !inMemoryUserStorage.existById(id)) {
             String errorMessage = "Пользователь " + (id == null ? "должен иметь id." : "с id " + id + " не существует.");
             log.warn("Ошибка при обновлении пользователя: {}", errorMessage);
             throw new UserNotFoundException(errorMessage);
         }
-        User oldUser = inMemoryUserStorage.find(userDto.getId()).get();
+        User oldUser = inMemoryUserStorage.find(userDto.getId()).orElseThrow(() -> new UserNotFoundException(
+                "Пользователь с id: " + id + " не найден."
+        ));
         User newUser = mapToUser(userDto);
         newUser.setFriends(oldUser.getFriends());
         return inMemoryUserStorage.update(newUser);
-
     }
 
 
@@ -52,23 +53,24 @@ public class UserService {
     }
 
     public User getUserById(Long id) {
-        Optional<User> user = inMemoryUserStorage.find(id);
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("Пользователя с id: " + id + " не удалось найти :(");
-        }
-        return user.get();
+        return inMemoryUserStorage.find(id)
+                .orElseThrow(() -> new UserNotFoundException("Пользователя с id:" + id + "не удалось найти :("));
     }
 
     public void addFriendById(Long id, Long friendId) {
-        if (id == null || inMemoryUserStorage.find(id).isEmpty()) {
+        if (id == null || !inMemoryUserStorage.existById(id)) {
             throw new UserNotFoundException("Пользователя с id: " + id + " не удалось найти :(");
         }
-        User user = inMemoryUserStorage.find(id).get();
+        User user = inMemoryUserStorage.find(id).orElseThrow(() -> new UserNotFoundException(
+                "Пользователь с id: " + id + " не найден."
+        ));
 
-        if (friendId == null || inMemoryUserStorage.find(friendId).isEmpty()) {
+        if (friendId == null || !inMemoryUserStorage.existById(friendId)) {
             throw new UserNotFoundException("Пользователя с id: " + id + " не удалось найти :(");
         }
-        User friend = inMemoryUserStorage.find(friendId).get();
+        User friend = inMemoryUserStorage.find(friendId).orElseThrow(() -> new UserNotFoundException(
+                "Пользователь с id: " + friendId + " не найден."
+        ));
         if (friend.equals(user)) {
             throw new FriendsException("Вы не можете добавить сами себя в друзья");
         }
@@ -77,15 +79,19 @@ public class UserService {
     }
 
     public void deleteFriendById(Long id, Long friendId) {
-        if (id == null || inMemoryUserStorage.find(id).isEmpty()) {
+        if (id == null || !inMemoryUserStorage.existById(id)) {
             throw new UserNotFoundException("Пользователя с id: " + id + " не удалось найти :(");
         }
-        User user = inMemoryUserStorage.find(id).get();
+        User user = inMemoryUserStorage.find(id).orElseThrow(() -> new UserNotFoundException(
+                "Пользователь с id: " + id + " не найден."
+        ));
 
-        if (friendId == null || inMemoryUserStorage.find(friendId).isEmpty()) {
+        if (friendId == null || !inMemoryUserStorage.existById(friendId)) {
             throw new UserNotFoundException("Пользователя с id: " + id + " не удалось найти :(");
         }
-        User friend = inMemoryUserStorage.find(friendId).get();
+        User friend = inMemoryUserStorage.find(friendId).orElseThrow(() -> new UserNotFoundException(
+                "Пользователь с id: " + id + " не найден."
+        ));
         user.getFriends().remove(friendId);
         friend.getFriends().remove(id);
     }
@@ -125,7 +131,7 @@ public class UserService {
     }
 
     public boolean contain(Long id) {
-        return inMemoryUserStorage.containUser(id);
+        return inMemoryUserStorage.existById(id);
     }
 
     private User mapToUser(UserDto userDto) {
@@ -147,15 +153,13 @@ public class UserService {
             userDto.setName(userDto.getLogin());
         }
 
-        User user = User.builder()
+        return User.builder()
                 .id(userDto.getId())
                 .email(userDto.getEmail())
                 .login(userDto.getLogin())
                 .name(userDto.getName())
                 .birthday(birthday)
                 .build();
-
-        return user;
     }
 
     private boolean containSpace(String s) {
