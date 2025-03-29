@@ -62,4 +62,10 @@ public class ExceptionController {
     public ExceptionDto handleFriendsException(final FriendsException e) {
         return new ExceptionDto(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ExceptionDto handleInternalServerException(final InternalServerException e){
+        return new ExceptionDto(e.getMessage());
+    }
 }
