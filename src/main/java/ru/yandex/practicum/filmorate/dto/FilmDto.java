@@ -20,6 +20,5 @@ public class FilmDto {
     @NotNull(message = "Продолжительность не можеть быть пустой.")
     @Positive
     private Long duration;
-
-    private Set<Long> likes;
+    private String rating;
 }

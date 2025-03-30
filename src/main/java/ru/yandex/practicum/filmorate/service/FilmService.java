@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.exeption.DateIsToOldException;
 import ru.yandex.practicum.filmorate.exeption.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exeption.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorageImpl.Rating;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.Duration;
@@ -102,12 +103,15 @@ public class FilmService {
         }
         Duration duration = Duration.ofMinutes(filmDto.getDuration());
 
+        Rating rating
+        try(Rating.valueOf(filmDto.getRating());)
         return Film.builder()
                 .id(filmDto.getId())
                 .description(filmDto.getDescription())
                 .duration(duration)
-                .name(filmDto.getName())
+                .title(filmDto.getName())
                 .releaseDate(date)
+                .rating()
                 .build();
     }
 
@@ -117,7 +121,7 @@ public class FilmService {
         return FilmDto.builder()
                 .id(film.getId())
                 .description(film.getDescription())
-                .name(film.getName())
+                .name(film.getTitle())
                 .releaseDate(film.getReleaseDate().format(formater))
                 .duration(film.getDuration().getSeconds() / 60)
                 .likes(film.getLikes())
