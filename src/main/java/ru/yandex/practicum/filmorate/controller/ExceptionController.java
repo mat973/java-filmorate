@@ -68,4 +68,16 @@ public class ExceptionController {
     public ExceptionDto handleInternalServerException(final InternalServerException e){
         return new ExceptionDto(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.OK)
+    public ExceptionDto handleUserAddFriendException(final UserAddFriendException e){
+        return new ExceptionDto(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.OK)
+    public ExceptionDto handleUserDeleteFriendException(final UserDeleteFriendException e){
+        return new ExceptionDto(e.getMessage());
+    }
 }
