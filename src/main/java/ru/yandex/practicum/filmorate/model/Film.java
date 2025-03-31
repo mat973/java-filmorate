@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorageImpl.Rating;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,6 +18,7 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private Duration duration;
-    private Rating rating;
+    private Rating mpa;
+    private List<String> genres;
 
 }

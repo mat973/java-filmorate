@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
@@ -20,5 +20,6 @@ public class FilmDto {
     @NotNull(message = "Продолжительность не можеть быть пустой.")
     @Positive
     private Long duration;
-    private String rating;
+    private String mpa;
+    private List<String> genres;
 }

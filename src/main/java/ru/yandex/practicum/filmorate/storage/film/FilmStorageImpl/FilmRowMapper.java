@@ -1,11 +1,14 @@
 package ru.yandex.practicum.filmorate.storage.film.FilmStorageImpl;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.ArrayList;
 
+@Component
 public class FilmRowMapper implements RowMapper<Film>{
 
     @Override
@@ -15,18 +18,9 @@ public class FilmRowMapper implements RowMapper<Film>{
                 .title(rs.getString("title"))
                 .description(rs.getString("description"))
                 .releaseDate(rs.getDate("release_date").toLocalDate())
-                .duration(parseInterval(rs.getString("duration")))
-                .rating(Rating.valueOf(rs.getString("rating")))
+                .duration(Duration.ofMinutes(rs.getInt("duration")))
+                .mpa(Rating.valueOf(rs.getString("mpa_name")))
+                .genres(new ArrayList<>())  // Жанры будут заполнены отдельно
                 .build();
-    }
-
-
-    private Duration parseInterval(String pgInterval) {
-        String[] parts = pgInterval.split(":");
-        long hours = Long.parseLong(parts[0]);
-        long minutes = Long.parseLong(parts[1]);
-
-        return Duration.ofHours(hours)
-                .plusMinutes(minutes);
     }
 }
