@@ -16,7 +16,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
-@Component("bd")
+@Component("user-bd")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbc;
     private final RowMapper<User> mapper;
@@ -84,27 +84,7 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
-//    @Override
-//    public void addFriendById(Long userId, Long friendId) {
-//        Optional<Boolean> confirmedByUser = isFriend(userId, friendId);
-//        Optional<Boolean> confirmedByFriend = isFriend(friendId, userId);
-//        if (confirmedByUser.isEmpty() && confirmedByFriend.isEmpty()) {
-//            jdbc.update(ADD_FRIEND_QUERY, userId, friendId);
-//        } else if (confirmedByUser.isPresent()) {
-//            if (confirmedByUser.get().equals(Boolean.FALSE)) {
-//                throw new UserAddFriendException("Вы уже отправили запрос другу id = " + friendId +
-//                        ", дождитесь подтверждения с его стороны");
-//            } else {
-//                throw new UserAddFriendException("Вы уже являетесь этим пользователем друзьями");
-//            }
-//        } else {
-//            if (confirmedByFriend.get().equals(Boolean.FALSE)) {
-//                jdbc.update(CONFIRM_FRIEND_QUERY, friendId, userId);
-//            } else {
-//                throw new UserAddFriendException("Вы уже являетесь этим пользователем друзьями");
-//            }
-//        }
-//    }
+
 @Override
 public void addFriendById(Long userId, Long friendId) {
     Optional<Boolean> isFriend = isFriend(userId, friendId);  // Проверяем, есть ли дружба или запрос
@@ -158,7 +138,7 @@ public void addFriendById(Long userId, Long friendId) {
         try {
             return Optional.ofNullable(jdbc.queryForObject(CHECK_FRIEND_QUERY, Boolean.class, userId, friendId));
         } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();  // Возвращаем пустой Optional, если друга нет
+            return Optional.empty();
         }
     }
 }

@@ -80,4 +80,10 @@ public class ExceptionController {
     public ExceptionDto handleUserDeleteFriendException(final UserDeleteFriendException e){
         return new ExceptionDto(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto handleIncorrectOfRatingException(final  IncorrectOfRatingException e){
+        return new ExceptionDto((e.getMessage()));
+    }
 }

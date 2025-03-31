@@ -36,7 +36,7 @@ public class UserService {
         return userStorage.save(mapToUser(userDto));
     }
     @Autowired
-    public UserService( @Qualifier("bd")UserStorage userStorage) {
+    public UserService( @Qualifier("user-bd")UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
