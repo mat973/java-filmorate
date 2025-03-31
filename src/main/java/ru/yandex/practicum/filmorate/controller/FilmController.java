@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.dto.FullFilm;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -24,6 +25,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     public FilmDto createFilm(@Valid @RequestBody FilmDto filmDto) {
         log.debug("Начало обработки запроса на создание фильма: {}", filmDto);
+        log.warn(filmDto.toString());
         return filmService.createFilm(filmDto);
 
     }
@@ -46,9 +48,10 @@ public class FilmController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public FilmDto getFilmById(@PathVariable Long id) {
+    public FullFilm getFullFilmById(@PathVariable Long id) {
         log.debug("Запрос на получение фильма с id: {}", id);
-        return filmService.getFilmById(id);
+        return filmService.getFilmWithGenre(id);
+       // return filmService.getFilmById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")

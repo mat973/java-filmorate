@@ -19,4 +19,10 @@ public interface FilmStorage {
     Boolean existById(Long id);
 
     List<Film> getAllFilms();
+
+    void addLike(Long filmId, Long userId);
+
+    void dislike(Long filmId, Long userId);
+
+
 }

@@ -86,4 +86,21 @@ public class ExceptionController {
     public ExceptionDto handleIncorrectOfRatingException(final  IncorrectOfRatingException e){
         return new ExceptionDto((e.getMessage()));
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionDto handleMpaNotExistException(final MpaNotExistException e){
+        return new ExceptionDto(e.getMessage());
+    }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionDto handleGenreNotExistException(final GenreNotExistException e){
+        return new ExceptionDto(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto handleFilmNotUpdateException(final FilmNotUpdateException e){
+        return new ExceptionDto(e.getMessage());
+    }
 }

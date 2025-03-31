@@ -7,6 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class FilmRowMapper implements RowMapper<Film>{
@@ -19,8 +22,9 @@ public class FilmRowMapper implements RowMapper<Film>{
                 .description(rs.getString("description"))
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(Duration.ofMinutes(rs.getInt("duration")))
-                .mpa(Rating.valueOf(rs.getString("mpa_name")))
-                .genres(new ArrayList<>())  // Жанры будут заполнены отдельно
+                .mpa(rs.getInt("rating_id"))
+                .genres(Arrays.stream((rs.getString("genres").split(","))).sequential()
+                        .map(Integer::parseInt).collect(Collectors.toList()))
                 .build();
     }
 }
