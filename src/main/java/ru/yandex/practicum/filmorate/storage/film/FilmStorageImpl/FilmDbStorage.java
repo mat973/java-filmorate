@@ -65,28 +65,29 @@ public class FilmDbStorage implements FilmStorage {
 
     private static final String SET_DISLIKE_QUERY = "DELETE FROM FILM_LIKES WHERE user_id = ? AND FILM_ID = ?";
     private static final String GET_POPULAR_FILMS_QUERY =
-            "SELECT \n" +
-                    "    f.film_id, \n" +
-                    "    f.title, \n" +
-                    "    f.description, \n" +
-                    "    f.release_date, \n" +
-                    "    f.duration, \n" +
-                    "    f.rating_id,\n" +
-                    "    STRING_AGG(fg.genre_id, ',') AS genres\n" +
-                    "FROM films f\n" +
-                    "JOIN ratings r ON f.rating_id = r.rating_id\n" +
-                    "JOIN film_genre fg ON f.film_id = fg.film_id\n" +
-                    "LEFT JOIN film_likes fl ON fl.film_id = f.film_id\n" +
-                    "GROUP BY f.film_id\n" +
-                    "ORDER BY \n" +
-                    "    COUNT(fl.user_id) DESC, \n" +
-                    "    f.film_id ASC\n" +
-                    "LIMIT ?";
+            """
+                    SELECT
+                        f.film_id,\s
+                        f.title,\s
+                        f.description,\s
+                        f.release_date,\s
+                        f.duration,\s
+                        f.rating_id,
+                        STRING_AGG(fg.genre_id, ',') AS genres
+                    FROM films f
+                    JOIN ratings r ON f.rating_id = r.rating_id
+                    JOIN film_genre fg ON f.film_id = fg.film_id
+                    LEFT JOIN film_likes fl ON fl.film_id = f.film_id
+                    GROUP BY f.film_id
+                    ORDER BY\s
+                        COUNT(fl.user_id) DESC,\s
+                        f.film_id ASC
+                    LIMIT ?""";
     private static final String EXIST_BY_ID_QUERY = "SELECT COUNT(*) > 0 FROM films WHERE film_id = ?";
     private static final String EXIST_MPA_BY_ID_QUERY = "SELECT COUNT(*) FROM ratings WHERE rating_id = ?";
     private static final String EXIST_GENRE_BY_ID_QUERY = "SELECT COUNT(*)  FROM genre where genre_id = ?";
     private static final String GET_FILM_BY_ID_GENRE = """
-            SELECT 
+            SELECT
                 f.film_id AS id,
                 f.title AS name,
                 f.description,
