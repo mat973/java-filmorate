@@ -16,6 +16,7 @@ public class FilmRowMapper implements RowMapper<Film>{
 
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
+
         return Film.builder()
                 .id(rs.getLong("film_id"))
                 .title(rs.getString("title"))
@@ -23,7 +24,8 @@ public class FilmRowMapper implements RowMapper<Film>{
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(Duration.ofMinutes(rs.getInt("duration")))
                 .mpa(rs.getInt("rating_id"))
-                .genres(Arrays.stream((rs.getString("genres").split(","))).sequential()
+                .genres(rs.getString("genres") ==null?
+                        null: Arrays.stream((rs.getString("genres").split(","))).sequential()
                         .map(Integer::parseInt).collect(Collectors.toList()))
                 .build();
     }

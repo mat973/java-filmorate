@@ -56,9 +56,9 @@ public class FilmService {
 //        Film oldFilm = filmStorage.find(filmDto.getId()).orElseThrow(() -> new FilmNotFoundException(
 //                "Фильм с id: " + id + " не найден."
 //        ));
-        if (filmDto.getGenres() == null){
-            filmDto.setGenres(filmStorage.find(filmDto.getId()).get().getGenres().stream().map(Genre::new).collect(Collectors.toList()));
-        }
+//        if (filmDto.getGenres() == null){
+//            filmDto.setGenres(filmStorage.find(filmDto.getId()).get().getGenres().stream().map(Genre::new).collect(Collectors.toList()));
+//        }
         Film newFilm = mapToFilm(filmDto);
 
 
@@ -105,13 +105,18 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
     public FullFilm getFilmWithGenre(Long id) {
-      FilmDto filmDto = mapToFilDto(filmStorage.find(id)
-              .orElseThrow(() ->  new FilmNotFoundException("Фильмиа са такми id не сущевует")));
-      Mpa mpa = mpaService.getMpaById((long) filmDto.getMpa().getId());
-      List<ru.yandex.practicum.filmorate.dto.Genre> genres = filmDto.getGenres().stream()
-              .map(x -> Long.valueOf(x.getId()))
-              .map(genreService::getGenreById)
-              .toList();
+        FilmDto filmDto = mapToFilDto(filmStorage.find(id)
+                .orElseThrow(() -> new FilmNotFoundException("Фильмиа са такми id не сущевует")));
+        Mpa mpa = mpaService.getMpaById((long) filmDto.getMpa().getId());
+        List<ru.yandex.practicum.filmorate.dto.Genre> genres;
+        if (filmDto.getGenres() != null){
+            genres =filmDto.getGenres().stream()
+                .map(x -> Long.valueOf(x.getId()))
+                .map(genreService::getGenreById)
+                .toList();
+    }else{
+            genres = null;
+        }
 
 
         return FullFilm.builder()
@@ -137,8 +142,17 @@ public class FilmService {
             throw  new MpaNotExistException("Рейтинг не может быть путсым");
         }
         if (filmDto.getGenres() == null){
-            throw new GenreNotExistException("Фильм должен быть какого то жанра");
+            return Film.builder()
+                    .id(filmDto.getId())
+                    .description(filmDto.getDescription())
+                    .duration(duration)
+                    .title(filmDto.getName())
+                    .releaseDate(date)
+                    .mpa(filmDto.getMpa().getId())
+                    .build();
         }
+
+
 
         return Film.builder()
                 .id(filmDto.getId())
@@ -153,6 +167,17 @@ public class FilmService {
 
 
     private static FilmDto mapToFilDto(Film film) {
+
+        if (film.getGenres() == null){
+            return FilmDto.builder()
+                    .id(film.getId())
+                    .description(film.getDescription())
+                    .name(film.getTitle())
+                    .releaseDate(film.getReleaseDate().format(formater))
+                    .duration(film.getDuration().getSeconds() / 60)
+                    .mpa(new MpaRating(film.getMpa()))
+                    .build();
+        }
 
         return FilmDto.builder()
                 .id(film.getId())

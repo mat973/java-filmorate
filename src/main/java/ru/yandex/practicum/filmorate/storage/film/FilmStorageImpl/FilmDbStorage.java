@@ -60,8 +60,8 @@ public class FilmDbStorage implements FilmStorage {
             "FROM films f\n" +
             "JOIN ratings r ON f.rating_id = r.rating_id\n" +
             "JOIN film_genre fg ON f.film_id = fg.film_id\n" +
-            "WHERE f.FILM_ID = ?\n" +
-            "GROUP BY f.film_id";
+            "WHERE f.FILM_ID = ?\n";
+           // "GROUP BY f.film_id";
 
     private static final String SET_LIKE_QUERY = "INSERT INTO FILM_LIKES (USER_ID, FILM_ID) VALUES (?,?)";
 
@@ -115,7 +115,7 @@ public class FilmDbStorage implements FilmStorage {
         if (jdbc.queryForObject(EXIST_MPA_BY_ID_QUERY, Integer.class, film.getMpa()) == 0) {
             throw new MpaNotExistException("Рейтинга с id = " + film.getMpa() + " не существует");
         }
-        if (!film.getGenres().stream()
+        if (film.getGenres() != null && !film.getGenres().stream()
                 .allMatch(genre -> jdbc.queryForObject(EXIST_GENRE_BY_ID_QUERY, Integer.class, genre) > 0)) {
             throw new GenreNotExistException("Жанра который вы указали не существует");
         }
@@ -129,10 +129,11 @@ public class FilmDbStorage implements FilmStorage {
             ps.setInt(5, film.getMpa());
             return ps;
         }, keyHolder);
-
         long filmId = keyHolder.getKey().longValue();
-        film.getGenres().forEach(x -> jdbc.update(INSERT_FILM_GENRE_QUERY, filmId, x));
         film.setId(filmId);
+        if (film.getGenres() !=  null) {
+            film.getGenres().forEach(x -> jdbc.update(INSERT_FILM_GENRE_QUERY, filmId, x));
+        }
 
         return film;
     }
@@ -152,10 +153,10 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         jdbc.update(DELETE_FILM_GENRE_QUERY, film.getId());
-
-        film.getGenres().forEach(genre ->
-                jdbc.update(INSERT_FILM_GENRE_QUERY, film.getId(), genre));
-
+        if (film.getGenres() != null) {
+            film.getGenres().forEach(genre ->
+                    jdbc.update(INSERT_FILM_GENRE_QUERY, film.getId(), genre));
+        }
         return film;
     }
 
