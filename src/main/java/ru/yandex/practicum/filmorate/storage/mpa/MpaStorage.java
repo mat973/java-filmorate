@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.dto.Mpa;
 import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class MpaStorage {

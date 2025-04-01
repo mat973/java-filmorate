@@ -2,11 +2,9 @@ package ru.yandex.practicum.filmorate.storage.film.FilmStorageImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dto.Genre;
 import ru.yandex.practicum.filmorate.exeption.FilmNotUpdateException;
 import ru.yandex.practicum.filmorate.exeption.GenreNotExistException;
 import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
@@ -61,12 +59,12 @@ public class FilmDbStorage implements FilmStorage {
             "JOIN ratings r ON f.rating_id = r.rating_id\n" +
             "JOIN film_genre fg ON f.film_id = fg.film_id\n" +
             "WHERE f.FILM_ID = ?\n";
-           // "GROUP BY f.film_id";
+    // "GROUP BY f.film_id";
 
     private static final String SET_LIKE_QUERY = "INSERT INTO FILM_LIKES (USER_ID, FILM_ID) VALUES (?,?)";
 
     private static final String SET_DISLIKE_QUERY = "DELETE FROM FILM_LIKES WHERE user_id = ? AND FILM_ID = ?";
-        private static final String GET_POPULAR_FILMS_QUERY =
+    private static final String GET_POPULAR_FILMS_QUERY =
             "SELECT \n" +
                     "    f.film_id, \n" +
                     "    f.title, \n" +
@@ -88,27 +86,27 @@ public class FilmDbStorage implements FilmStorage {
     private static final String EXIST_MPA_BY_ID_QUERY = "SELECT COUNT(*) FROM ratings WHERE rating_id = ?";
     private static final String EXIST_GENRE_BY_ID_QUERY = "SELECT COUNT(*)  FROM genre where genre_id = ?";
     private static final String GET_FILM_BY_ID_GENRE = """
-        SELECT 
-            f.film_id AS id,
-            f.title AS name,
-            f.description,
-            f.release_date AS releaseDate,
-            f.duration,
-            r.rating_id AS "mpa.id",
-            r.name AS "mpa.name",
-            JSON_AGG(
-                JSON_BUILD_OBJECT(
-                    'id', g.genre_id,
-                    'name', g.name
-                )
-            ) AS genres
-        FROM films f
-        JOIN ratings r ON f.rating_id = r.rating_id
-        LEFT JOIN film_genre fg ON f.film_id = fg.film_id
-        LEFT JOIN genres g ON fg.genre_id = g.genre_id
-        WHERE f.film_id = ?
-        GROUP BY f.film_id, r.rating_id
-        """;
+            SELECT 
+                f.film_id AS id,
+                f.title AS name,
+                f.description,
+                f.release_date AS releaseDate,
+                f.duration,
+                r.rating_id AS "mpa.id",
+                r.name AS "mpa.name",
+                JSON_AGG(
+                    JSON_BUILD_OBJECT(
+                        'id', g.genre_id,
+                        'name', g.name
+                    )
+                ) AS genres
+            FROM films f
+            JOIN ratings r ON f.rating_id = r.rating_id
+            LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+            LEFT JOIN genres g ON fg.genre_id = g.genre_id
+            WHERE f.film_id = ?
+            GROUP BY f.film_id, r.rating_id
+            """;
 
     @Override
     public Film save(Film film) {
@@ -131,7 +129,7 @@ public class FilmDbStorage implements FilmStorage {
         }, keyHolder);
         long filmId = keyHolder.getKey().longValue();
         film.setId(filmId);
-        if (film.getGenres() !=  null) {
+        if (film.getGenres() != null) {
             film.getGenres().forEach(x -> jdbc.update(INSERT_FILM_GENRE_QUERY, filmId, x));
         }
 
@@ -185,7 +183,6 @@ public class FilmDbStorage implements FilmStorage {
     public void dislike(Long filmId, Long userId) {
         jdbc.update(SET_DISLIKE_QUERY, userId, filmId);
     }
-
 
 
     @Override

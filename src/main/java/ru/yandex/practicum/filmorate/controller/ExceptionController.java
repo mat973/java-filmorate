@@ -65,42 +65,43 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionDto handleInternalServerException(final InternalServerException e){
+    public ExceptionDto handleInternalServerException(final InternalServerException e) {
         return new ExceptionDto(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.OK)
-    public ExceptionDto handleUserAddFriendException(final UserAddFriendException e){
+    public ExceptionDto handleUserAddFriendException(final UserAddFriendException e) {
         return new ExceptionDto(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.OK)
-    public ExceptionDto handleUserDeleteFriendException(final UserDeleteFriendException e){
+    public ExceptionDto handleUserDeleteFriendException(final UserDeleteFriendException e) {
         return new ExceptionDto(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto handleIncorrectOfRatingException(final  IncorrectOfRatingException e){
+    public ExceptionDto handleIncorrectOfRatingException(final IncorrectOfRatingException e) {
         return new ExceptionDto((e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionDto handleMpaNotExistException(final MpaNotExistException e){
+    public ExceptionDto handleMpaNotExistException(final MpaNotExistException e) {
         return new ExceptionDto(e.getMessage());
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionDto handleGenreNotExistException(final GenreNotExistException e){
+    public ExceptionDto handleGenreNotExistException(final GenreNotExistException e) {
         return new ExceptionDto(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto handleFilmNotUpdateException(final FilmNotUpdateException e){
+    public ExceptionDto handleFilmNotUpdateException(final FilmNotUpdateException e) {
         return new ExceptionDto(e.getMessage());
     }
 }

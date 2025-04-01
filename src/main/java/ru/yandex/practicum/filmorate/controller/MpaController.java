@@ -14,18 +14,19 @@ import java.util.List;
 @RequestMapping("/mpa")
 public class MpaController {
     private final MpaService mpaService;
+
     @Autowired
     public MpaController(MpaService mpaService) {
         this.mpaService = mpaService;
     }
 
     @GetMapping("/{mpaId}")
-    public Mpa getMpaById(@PathVariable Long mpaId){
+    public Mpa getMpaById(@PathVariable Long mpaId) {
         return mpaService.getMpaById(mpaId);
     }
 
     @GetMapping
-    public List<Mpa> getAllMpa(){
+    public List<Mpa> getAllMpa() {
         return mpaService.getAllMpa();
     }
 }

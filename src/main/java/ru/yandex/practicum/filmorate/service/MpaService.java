@@ -10,15 +10,16 @@ import java.util.List;
 
 @Service
 public class MpaService {
-private final MpaStorage mpaStorage;
+    private final MpaStorage mpaStorage;
+
     @Autowired
     public MpaService(MpaStorage mpaStorage) {
         this.mpaStorage = mpaStorage;
     }
 
     public Mpa getMpaById(Long mpaId) {
-        if (mpaId == null){
-            throw  new MpaNotExistException("Рейтинг не может быть путсым");
+        if (mpaId == null) {
+            throw new MpaNotExistException("Рейтинг не может быть путсым");
         }
         return mpaStorage.getMpaById(mpaId);
     }

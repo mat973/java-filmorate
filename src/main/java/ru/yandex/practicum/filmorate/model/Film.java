@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorageImpl.Rating;
 
 import java.time.Duration;
 import java.time.LocalDate;

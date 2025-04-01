@@ -51,7 +51,6 @@ public class FilmController {
     public FullFilm getFullFilmById(@PathVariable Long id) {
         log.debug("Запрос на получение фильма с id: {}", id);
         return filmService.getFilmWithGenre(id);
-       // return filmService.getFilmById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")

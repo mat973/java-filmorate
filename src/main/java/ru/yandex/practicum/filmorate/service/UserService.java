@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,8 +33,9 @@ public class UserService {
     public User createUser(UserDto userDto) {
         return userStorage.save(mapToUser(userDto));
     }
+
     @Autowired
-    public UserService( @Qualifier("user-bd")UserStorage userStorage) {
+    public UserService(@Qualifier("user-bd") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 

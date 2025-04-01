@@ -85,24 +85,24 @@ public class UserDbStorage implements UserStorage {
     }
 
 
-@Override
-public void addFriendById(Long userId, Long friendId) {
-    Optional<Boolean> isFriend = isFriend(userId, friendId);  // Проверяем, есть ли дружба или запрос
+    @Override
+    public void addFriendById(Long userId, Long friendId) {
+        Optional<Boolean> isFriend = isFriend(userId, friendId);  // Проверяем, есть ли дружба или запрос
 
-    if (isFriend.isEmpty()) {
-        jdbc.update(ADD_FRIEND_QUERY, userId, friendId);
-    } else if (isFriend.get().equals(Boolean.FALSE)) {
-        Optional<Boolean> isFriendBack = isFriend(friendId, userId);
-        if (isFriendBack.isEmpty() || isFriendBack.get().equals(Boolean.FALSE)) {
-            throw new UserAddFriendException("Вы уже отправили запрос другу id = " + friendId +
-                    ", дождитесь подтверждения с его стороны");
+        if (isFriend.isEmpty()) {
+            jdbc.update(ADD_FRIEND_QUERY, userId, friendId);
+        } else if (isFriend.get().equals(Boolean.FALSE)) {
+            Optional<Boolean> isFriendBack = isFriend(friendId, userId);
+            if (isFriendBack.isEmpty() || isFriendBack.get().equals(Boolean.FALSE)) {
+                throw new UserAddFriendException("Вы уже отправили запрос другу id = " + friendId +
+                        ", дождитесь подтверждения с его стороны");
+            } else {
+                jdbc.update(CONFIRM_FRIEND_QUERY, friendId, userId);
+            }
         } else {
-            jdbc.update(CONFIRM_FRIEND_QUERY, friendId, userId);
+            throw new UserAddFriendException("Вы уже являетесь этим пользователем друзьями");
         }
-    } else {
-        throw new UserAddFriendException("Вы уже являетесь этим пользователем друзьями");
     }
-}
 
     @Override
     public void deleteFriendById(Long userId, Long friendId) {
@@ -131,7 +131,6 @@ public void addFriendById(Long userId, Long friendId) {
     public List<User> getAllFriends(Long userId) {
         return jdbc.query(GET_FRIENDS_QUERY, mapper, userId, userId, userId);
     }
-
 
 
     private Optional<Boolean> isFriend(Long userId, Long friendId) {

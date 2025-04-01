@@ -8,12 +8,14 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.FullFilm;
 import ru.yandex.practicum.filmorate.dto.Mpa;
-import ru.yandex.practicum.filmorate.exeption.*;
+import ru.yandex.practicum.filmorate.exeption.DateIsToOldException;
+import ru.yandex.practicum.filmorate.exeption.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
+import ru.yandex.practicum.filmorate.exeption.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorageImpl.Rating;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -35,7 +37,7 @@ public class FilmService {
     private static final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
-    public FilmService(@Qualifier("film-bd")FilmStorage filmStorage, UserService userService, GenreService genreService, MpaService mpaService) {
+    public FilmService(@Qualifier("film-bd") FilmStorage filmStorage, UserService userService, GenreService genreService, MpaService mpaService) {
         this.filmStorage = filmStorage;
         this.userService = userService;
         this.genreService = genreService;
@@ -95,7 +97,7 @@ public class FilmService {
             throw new FilmNotFoundException("Фильм с id: " + id + " не удалось найти :(");
         }
 
-        filmStorage.dislike(id,userId);
+        filmStorage.dislike(id, userId);
     }
 
     public List<FilmDto> getPopularFilms(Integer count) {
@@ -104,17 +106,18 @@ public class FilmService {
                 .map(FilmService::mapToFilDto)
                 .collect(Collectors.toList());
     }
+
     public FullFilm getFilmWithGenre(Long id) {
         FilmDto filmDto = mapToFilDto(filmStorage.find(id)
                 .orElseThrow(() -> new FilmNotFoundException("Фильмиа са такми id не сущевует")));
         Mpa mpa = mpaService.getMpaById((long) filmDto.getMpa().getId());
         List<ru.yandex.practicum.filmorate.dto.Genre> genres;
-        if (filmDto.getGenres() != null){
-            genres =filmDto.getGenres().stream()
-                .map(x -> Long.valueOf(x.getId()))
-                .map(genreService::getGenreById)
-                .toList();
-    }else{
+        if (filmDto.getGenres() != null) {
+            genres = filmDto.getGenres().stream()
+                    .map(x -> Long.valueOf(x.getId()))
+                    .map(genreService::getGenreById)
+                    .toList();
+        } else {
             genres = null;
         }
 
@@ -138,10 +141,10 @@ public class FilmService {
         }
         Duration duration = Duration.ofMinutes(filmDto.getDuration());
 
-        if (filmDto.getMpa() == null){
-            throw  new MpaNotExistException("Рейтинг не может быть путсым");
+        if (filmDto.getMpa() == null) {
+            throw new MpaNotExistException("Рейтинг не может быть путсым");
         }
-        if (filmDto.getGenres() == null){
+        if (filmDto.getGenres() == null) {
             return Film.builder()
                     .id(filmDto.getId())
                     .description(filmDto.getDescription())
@@ -153,7 +156,6 @@ public class FilmService {
         }
 
 
-
         return Film.builder()
                 .id(filmDto.getId())
                 .description(filmDto.getDescription())
@@ -161,14 +163,14 @@ public class FilmService {
                 .title(filmDto.getName())
                 .releaseDate(date)
                 .mpa(filmDto.getMpa().getId())
-                .genres(filmDto.getGenres().stream().map(Genre::getId).collect(Collectors.toList()))
+                .genres(filmDto.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()).stream().toList())
                 .build();
     }
 
 
     private static FilmDto mapToFilDto(Film film) {
 
-        if (film.getGenres() == null){
+        if (film.getGenres() == null) {
             return FilmDto.builder()
                     .id(film.getId())
                     .description(film.getDescription())
