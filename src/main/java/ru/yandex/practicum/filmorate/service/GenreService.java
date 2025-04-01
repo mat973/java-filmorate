@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exeption.GenreNotExistException;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class GenreService {
@@ -26,5 +27,9 @@ public class GenreService {
 
     public List<Genre> getAllGenre() {
         return genreStorage.getAllGenre();
+    }
+
+    public List<Genre> getGenresByIds(Set<Long> genreIds) {
+        return genreStorage.getGenresById(genreIds);
     }
 }

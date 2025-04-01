@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.UserDto;
@@ -14,10 +13,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
+@Slf4j
 public class UserController {
-    private final Logger log = LoggerFactory.getLogger(UserController.class);
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
 
     @PostMapping()
@@ -48,28 +47,35 @@ public class UserController {
         return userService.getUserById(id);
     }
 
-    @PutMapping("/{id}/friends/{friendId}")
+    @PutMapping("/{userId}/friends/{friendId}")
     @ResponseStatus(HttpStatus.OK)
-    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        userService.addFriendById(id, friendId);
+    public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        log.info("Выполнение запроса по добавлению в друзья от пользователям userId {}, польщователю friend userId {}",
+                userId, friendId);
+        userService.addFriendById(userId, friendId);
     }
 
-    @DeleteMapping("/{id}/friends/{friendId}")
+    @DeleteMapping("/{userId}/friends/{friendId}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        userService.deleteFriendById(id, friendId);
+    public void deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        log.info("Выполнение запроса по удалению из друзей от пользователям userId {}, польщователю friend userId {}",
+                userId, friendId);
+        userService.deleteFriendById(userId, friendId);
     }
 
-    @GetMapping("/{id}/friends")
+    @GetMapping("/{userId}/friends")
     @ResponseStatus(HttpStatus.OK)
-    public List<User> getAllFriends(@PathVariable Long id) {
-        return userService.getAllFriends(id);
+    public List<User> getAllFriends(@PathVariable Long userId) {
+        log.info("Выполнение запроса для вывода списка друзей для пользователя с userId {}", userId);
+        return userService.getAllFriends(userId);
     }
 
-    @GetMapping("/{id}/friends/common/{otherId}")
+    @GetMapping("/{userId}/friends/common/{otherUserId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
-        return userService.getCommonFriends(id, otherId);
+    public List<User> getCommonFriends(@PathVariable Long userId, @PathVariable Long otherUserId) {
+        log.info("Выполнение запроса по вывода списка общх друзей двух пользователий userid {} и otherUserId {}",
+                userId, otherUserId);
+        return userService.getCommonFriends(userId, otherUserId);
     }
 
 

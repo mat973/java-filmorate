@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user.UserStorageImpl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -16,6 +16,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Component("user-bd")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbc;
@@ -30,19 +31,22 @@ public class UserDbStorage implements UserStorage {
     private static final String ADD_FRIEND_QUERY = "INSERT INTO friends (user_id, friend_id, confirmed) VALUES (?, ?, FALSE)";
     private static final String CONFIRM_FRIEND_QUERY = "UPDATE friends SET confirmed = TRUE WHERE user_id = ? AND friend_id = ? AND confirmed = FALSE";
     private static final String DELETE_FRIEND_QUERY = "DELETE FROM friends WHERE user_id = ? AND friend_id = ? AND confirmed = FALSE";
-    private static final String UPDATE_FRIEND_STATUS_QUERY = "UPDATE friends SET confirmed = FALSE, user_id = friend_id, friend_id = user_id WHERE user_id = ? AND friend_id = ? AND confirmed = TRUE";
-    private static final String GET_FRIENDS_QUERY = "SELECT u.* \n" +
-            "FROM users u  \n" +
-            "JOIN friends f ON u.user_id = f.friend_id OR u.user_id = f.user_id\n" +
-            "WHERE (f.user_id = ? OR (f.friend_id = ? AND confirmed = TRUE))\n" +
-            "AND u.user_id != ? ";
-    private static final String CHECK_FRIEND_QUERY = "SELECT confirmed FROM friends WHERE (user_id = ? AND friend_id = ?)";
+    private static final String UPDATE_FRIEND_STATUS_QUERY = """
+            UPDATE friends
+            SET
+                 confirmed = FALSE,
+                 user_id = friend_id,
+                 friend_id = user_id WHERE user_id = ? AND friend_id = ? AND confirmed = TRUE""";
+    private static final String GET_FRIENDS_QUERY = """
+            SELECT u.*
+            FROM users u
+            JOIN friends f ON u.user_id = f.friend_id OR u.user_id = f.user_id
+            WHERE (f.user_id = ? OR (f.friend_id = ? AND confirmed = TRUE))
+            AND u.user_id != ?
+            """;
 
-    @Autowired
-    public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
-        this.jdbc = jdbc;
-        this.mapper = mapper;
-    }
+
+    private static final String CHECK_FRIEND_QUERY = "SELECT confirmed FROM friends WHERE (user_id = ? AND friend_id = ?)";
 
     public List<User> getAllUsers() {
         return jdbc.query(FIND_ALL_QUERY, mapper);
@@ -58,8 +62,8 @@ public class UserDbStorage implements UserStorage {
 
 
     @Override
-    public Boolean existById(Long id) {
-        return Boolean.TRUE.equals(jdbc.queryForObject(EXIST_BY_ID_QUERY, Boolean.class, id));
+    public Boolean existById(Long userId) {
+        return Boolean.TRUE.equals(jdbc.queryForObject(EXIST_BY_ID_QUERY, Boolean.class, userId));
     }
 
 

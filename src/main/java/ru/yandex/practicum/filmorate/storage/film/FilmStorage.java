@@ -10,11 +10,11 @@ public interface FilmStorage {
 
     Film update(Film film);
 
-    Optional<Film> find(Long id);
+    Optional<Film> find(Long filmId);
 
     List<Film> getPopularFilms(Integer count);
 
-    Boolean existById(Long id);
+    Boolean existById(Long filmId);
 
     List<Film> getAllFilms();
 

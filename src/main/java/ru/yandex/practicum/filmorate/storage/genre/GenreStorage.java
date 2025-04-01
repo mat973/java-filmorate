@@ -6,7 +6,10 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.Genre;
 import ru.yandex.practicum.filmorate.exeption.GenreNotExistException;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class GenreStorage {
@@ -33,5 +36,20 @@ public class GenreStorage {
 
     public List<Genre> getAllGenre() {
         return jdbc.query(GET_ALL_GENRE_QUERY, rowMapper);
+    }
+
+    public List<Genre> getGenresById(Set<Long> genreIds) {
+        if (genreIds == null || genreIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+
+        String inSql = genreIds.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(", "));
+
+        String sql = "SELECT * FROM genre WHERE genre_id IN (" + inSql + ") ORDER BY genre_id";
+
+        return jdbc.query(sql, rowMapper, genreIds.toArray());
     }
 }

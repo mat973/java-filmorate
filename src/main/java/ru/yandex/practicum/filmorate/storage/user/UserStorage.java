@@ -10,11 +10,11 @@ public interface UserStorage {
 
     User update(User user);
 
-    Optional<User> find(Long id);
+    Optional<User> find(Long userId);
 
     List<User> getAllUsers();
 
-    Boolean existById(Long id);
+    Boolean existById(Long userId);
 
     void addFriendById(Long userId, Long friendId);
 

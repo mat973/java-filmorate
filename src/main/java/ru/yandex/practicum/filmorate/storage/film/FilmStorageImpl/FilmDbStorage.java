@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film.FilmStorageImpl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -18,16 +18,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Component("film-bd")
+@RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbc;
     private final FilmRowMapper filmRowMapper;
-
-
-    @Autowired
-    public FilmDbStorage(JdbcTemplate jdbc, FilmRowMapper filmRowMapper) {
-        this.jdbc = jdbc;
-        this.filmRowMapper = filmRowMapper;
-    }
 
 
     private static final String FIND_BY_ID_QUERY =
@@ -46,20 +40,29 @@ public class FilmDbStorage implements FilmStorage {
             "UPDATE films SET title = ?, description = ?, release_date = ?, duration = ?, rating_id = ? WHERE film_id = ?";
     private static final String DELETE_FILM_GENRE_QUERY =
             "DELETE FROM film_genre WHERE film_id = ?";
-    private static final String GET_ALL_FILMS_QUERY = "SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.RATING_ID AS rating_id,\n" +
-            "       STRING_AGG(fg.genre_id, ',') AS genres\n" +
-            "FROM films f\n" +
-            "JOIN ratings r ON f.rating_id = r.rating_id\n" +
-            "JOIN film_genre fg ON f.film_id = fg.film_id\n" +
-            "GROUP BY f.film_id\n" +
-            "ORDER BY f.film_id";
-    private static final String GET_FILM_BY_ID = "SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.RATING_ID AS rating_id,\n" +
-            "       STRING_AGG(fg.genre_id, ',') AS genres\n" +
-            "FROM films f\n" +
-            "JOIN ratings r ON f.rating_id = r.rating_id\n" +
-            "JOIN film_genre fg ON f.film_id = fg.film_id\n" +
-            "WHERE f.FILM_ID = ?\n";
-    // "GROUP BY f.film_id";
+    private static final String GET_ALL_FILMS_QUERY = """
+            SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.RATING_ID AS rating_id,
+            STRING_AGG(fg.genre_id, ',') AS genres
+            FROM films f
+            JOIN ratings r ON f.rating_id = r.rating_id
+            JOIN film_genre fg ON f.film_id = fg.film_id
+            GROUP BY f.film_id
+            ORDER BY f.film_id
+            """;
+    private static final String GET_FILM_BY_ID = """
+            SELECT
+                f.film_id,
+                f.title,
+                f.description,
+                f.release_date,
+                f.duration,
+                f.RATING_ID AS rating_id,
+                STRING_AGG(fg.genre_id, ',') AS genres
+            FROM films f
+            JOIN ratings r ON f.rating_id = r.rating_id
+            JOIN film_genre fg ON f.film_id = fg.film_id
+            WHERE f.FILM_ID = ?
+            """;
 
     private static final String SET_LIKE_QUERY = "INSERT INTO FILM_LIKES (USER_ID, FILM_ID) VALUES (?,?)";
 
@@ -171,8 +174,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        List<Film> films = jdbc.query(GET_ALL_FILMS_QUERY, filmRowMapper);
-        return films;
+        return jdbc.query(GET_ALL_FILMS_QUERY, filmRowMapper);
     }
 
     @Override

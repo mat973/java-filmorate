@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.FullFilm;
@@ -20,11 +19,11 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-
+@RequiredArgsConstructor
 public class FilmService {
 
     private final FilmStorage filmStorage;
@@ -36,13 +35,6 @@ public class FilmService {
     private final LocalDate checkDate = LocalDate.of(1895, 12, 28);
     private static final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    @Autowired
-    public FilmService(@Qualifier("film-bd") FilmStorage filmStorage, UserService userService, GenreService genreService, MpaService mpaService) {
-        this.filmStorage = filmStorage;
-        this.userService = userService;
-        this.genreService = genreService;
-        this.mpaService = mpaService;
-    }
 
     public FilmDto createFilm(FilmDto filmDto) {
         Film film = filmStorage.save(mapToFilm(filmDto));
@@ -55,12 +47,6 @@ public class FilmService {
             String errorMessage = "Фильм " + (id == null ? "должен иметь id." : "с id " + id + " не существует.");
             throw new FilmNotFoundException(errorMessage);
         }
-//        Film oldFilm = filmStorage.find(filmDto.getId()).orElseThrow(() -> new FilmNotFoundException(
-//                "Фильм с id: " + id + " не найден."
-//        ));
-//        if (filmDto.getGenres() == null){
-//            filmDto.setGenres(filmStorage.find(filmDto.getId()).get().getGenres().stream().map(Genre::new).collect(Collectors.toList()));
-//        }
         Film newFilm = mapToFilm(filmDto);
 
 
@@ -72,32 +58,32 @@ public class FilmService {
         return filmStorage.getAllFilms();
     }
 
-    public FilmDto getFilmById(Long id) {
-        Film film = filmStorage.find(id)
-                .orElseThrow(() -> new FilmNotFoundException("Фильм с id:" + id + "не удалось найти :("));
+    public FilmDto getFilmById(Long filmID) {
+        Film film = filmStorage.find(filmID)
+                .orElseThrow(() -> new FilmNotFoundException("Фильм с filmID:" + filmID + "не удалось найти :("));
         return mapToFilDto(film);
     }
 
-    public void addLike(Long id, Long userId) {
+    public void addLike(Long filmId, Long userId) {
         if (userId == null || !userService.contain(userId)) {
-            throw new UserNotFoundException("Пользователя с id: " + userId + " не удалось найти :(");
+            throw new UserNotFoundException("Пользователя с filmId: " + userId + " не удалось найти :(");
         }
-        if (id == null || !filmStorage.existById(id)) {
-            throw new FilmNotFoundException("Фильм с id: " + id + " не удалось найти :(");
+        if (filmId == null || !filmStorage.existById(filmId)) {
+            throw new FilmNotFoundException("Фильм с filmId: " + filmId + " не удалось найти :(");
         }
 
-        filmStorage.addLike(id, userId);
+        filmStorage.addLike(filmId, userId);
     }
 
-    public void deleteLike(Long id, Long userId) {
+    public void deleteLike(Long filmId, Long userId) {
         if (userId == null || !userService.contain(userId)) {
-            throw new UserNotFoundException("Пользователя не может быть с пустым id");
+            throw new UserNotFoundException("Пользователя не может быть с пустым filmId");
         }
-        if (id == null || !filmStorage.existById(id)) {
-            throw new FilmNotFoundException("Фильм с id: " + id + " не удалось найти :(");
+        if (filmId == null || !filmStorage.existById(filmId)) {
+            throw new FilmNotFoundException("Фильм с filmId: " + filmId + " не удалось найти :(");
         }
 
-        filmStorage.dislike(id, userId);
+        filmStorage.dislike(filmId, userId);
     }
 
     public List<FilmDto> getPopularFilms(Integer count) {
@@ -107,20 +93,32 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-    public FullFilm getFilmWithGenre(Long id) {
-        FilmDto filmDto = mapToFilDto(filmStorage.find(id)
-                .orElseThrow(() -> new FilmNotFoundException("Фильмиа са такми id не сущевует")));
-        Mpa mpa = mpaService.getMpaById((long) filmDto.getMpa().getId());
-        List<ru.yandex.practicum.filmorate.dto.Genre> genres;
-        if (filmDto.getGenres() != null) {
-            genres = filmDto.getGenres().stream()
-                    .map(x -> Long.valueOf(x.getId()))
-                    .map(genreService::getGenreById)
-                    .toList();
-        } else {
-            genres = null;
-        }
+    public FullFilm getFilmWithGenre(Long filmId) {
+        FilmDto filmDto = mapToFilDto(filmStorage.find(filmId)
+                .orElseThrow(() -> new FilmNotFoundException("Фильма с таким filmId не существует")));
 
+        Mpa mpa = mpaService.getMpaById((long) filmDto.getMpa().getId());
+
+        List<ru.yandex.practicum.filmorate.dto.Genre> genres = Collections.emptyList();
+        if (filmDto.getGenres() != null && !filmDto.getGenres().isEmpty()) {
+            // Собираем id всех жанров
+            Set<Long> genreIds = filmDto.getGenres().stream()
+                    .map(genre -> (long) genre.getId()) // Приводим к Long
+                    .collect(Collectors.toSet());
+
+            // Получаем список жанров одной пачкой
+            List<ru.yandex.practicum.filmorate.dto.Genre> genreList = genreService.getGenresByIds(genreIds);
+
+            // Создаем мапу id -> жанр для быстрого поиска
+            Map<Integer, ru.yandex.practicum.filmorate.dto.Genre> genreMap = genreList.stream()
+                    .collect(Collectors.toMap(ru.yandex.practicum.filmorate.dto.Genre::getId, genre -> genre));
+
+            // Подставляем жанры из мапы
+            genres = filmDto.getGenres().stream()
+                    .map(x -> genreMap.get(x.getId()))
+                    .filter(Objects::nonNull) // Убираем null (если id нет в базе)
+                    .toList();
+        }
 
         return FullFilm.builder()
                 .id(filmDto.getId())
@@ -132,6 +130,33 @@ public class FilmService {
                 .genres(genres)
                 .build();
     }
+
+
+//    public FullFilm getFilmWithGenre(Long filmId) {
+//        FilmDto filmDto = mapToFilDto(filmStorage.find(filmId)
+//                .orElseThrow(() -> new FilmNotFoundException("Фильмиа са такми filmId не сущевует")));
+//        Mpa mpa = mpaService.getMpaById((long) filmDto.getMpa().getId());
+//        List<ru.yandex.practicum.filmorate.dto.Genre> genres;
+//        if (filmDto.getGenres() != null) {
+//            genres = filmDto.getGenres().stream()
+//                    .map(x -> Long.valueOf(x.getId()))
+//                    .map(genreService::getGenreById)
+//                    .toList();
+//        } else {
+//            genres = null;
+//        }
+//
+//
+//        return FullFilm.builder()
+//                .id(filmDto.getId())
+//                .name(filmDto.getName())
+//                .description(filmDto.getDescription())
+//                .duration(filmDto.getDuration())
+//                .mpa(mpa)
+//                .releaseDate(filmDto.getReleaseDate())
+//                .genres(genres)
+//                .build();
+//    }
 
 
     private Film mapToFilm(FilmDto filmDto) {

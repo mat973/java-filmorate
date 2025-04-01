@@ -46,28 +46,31 @@ public class FilmController {
         return filmService.getAllFilms();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{filmId}")
     @ResponseStatus(HttpStatus.OK)
-    public FullFilm getFullFilmById(@PathVariable Long id) {
-        log.debug("Запрос на получение фильма с id: {}", id);
-        return filmService.getFilmWithGenre(id);
+    public FullFilm getFullFilmById(@PathVariable Long filmId) {
+        log.debug("Запрос на получение фильма с id: {}", filmId);
+        return filmService.getFilmWithGenre(filmId);
     }
 
-    @PutMapping("/{id}/like/{userId}")
+    @PutMapping("/{filmId}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
-        filmService.addLike(id, userId);
+    public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        log.info("Запрос на добавление лйка фильму с filmId {} от пользоватля с userId {}", filmId, userId);
+        filmService.addLike(filmId, userId);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
+    @DeleteMapping("/{filmId}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
-        filmService.deleteLike(id, userId);
+    public void deleteLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        log.info("Запрос на удаление лйка фильму с filmId {} от пользоватля с userId {}", filmId, userId);
+        filmService.deleteLike(filmId, userId);
     }
 
     @GetMapping("/popular")
     @ResponseStatus(HttpStatus.OK)
     public List<FilmDto> getPopularFilms(@RequestParam Optional<Integer> count) {
+        log.info("Запрос на получение популярных фильмов.");
         Integer countt;
         if (count.isEmpty()) {
             countt = 10;
