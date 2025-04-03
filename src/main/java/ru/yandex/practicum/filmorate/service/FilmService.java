@@ -101,22 +101,18 @@ public class FilmService {
 
         List<ru.yandex.practicum.filmorate.dto.Genre> genres = Collections.emptyList();
         if (filmDto.getGenres() != null && !filmDto.getGenres().isEmpty()) {
-            // Собираем id всех жанров
             Set<Long> genreIds = filmDto.getGenres().stream()
-                    .map(genre -> (long) genre.getId()) // Приводим к Long
+                    .map(genre -> (long) genre.getId())
                     .collect(Collectors.toSet());
 
-            // Получаем список жанров одной пачкой
             List<ru.yandex.practicum.filmorate.dto.Genre> genreList = genreService.getGenresByIds(genreIds);
 
-            // Создаем мапу id -> жанр для быстрого поиска
             Map<Integer, ru.yandex.practicum.filmorate.dto.Genre> genreMap = genreList.stream()
                     .collect(Collectors.toMap(ru.yandex.practicum.filmorate.dto.Genre::getId, genre -> genre));
 
-            // Подставляем жанры из мапы
             genres = filmDto.getGenres().stream()
                     .map(x -> genreMap.get(x.getId()))
-                    .filter(Objects::nonNull) // Убираем null (если id нет в базе)
+                    .filter(Objects::nonNull)
                     .toList();
         }
 
@@ -130,33 +126,6 @@ public class FilmService {
                 .genres(genres)
                 .build();
     }
-
-
-//    public FullFilm getFilmWithGenre(Long filmId) {
-//        FilmDto filmDto = mapToFilDto(filmStorage.find(filmId)
-//                .orElseThrow(() -> new FilmNotFoundException("Фильмиа са такми filmId не сущевует")));
-//        Mpa mpa = mpaService.getMpaById((long) filmDto.getMpa().getId());
-//        List<ru.yandex.practicum.filmorate.dto.Genre> genres;
-//        if (filmDto.getGenres() != null) {
-//            genres = filmDto.getGenres().stream()
-//                    .map(x -> Long.valueOf(x.getId()))
-//                    .map(genreService::getGenreById)
-//                    .toList();
-//        } else {
-//            genres = null;
-//        }
-//
-//
-//        return FullFilm.builder()
-//                .id(filmDto.getId())
-//                .name(filmDto.getName())
-//                .description(filmDto.getDescription())
-//                .duration(filmDto.getDuration())
-//                .mpa(mpa)
-//                .releaseDate(filmDto.getReleaseDate())
-//                .genres(genres)
-//                .build();
-//    }
 
 
     private Film mapToFilm(FilmDto filmDto) {
