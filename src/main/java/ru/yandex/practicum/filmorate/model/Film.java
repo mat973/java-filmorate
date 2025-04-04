@@ -6,17 +6,18 @@ import lombok.EqualsAndHashCode;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
 @EqualsAndHashCode
 public class Film {
     private Long id;
-    private String name;
+    private String title;
     private String description;
     private LocalDate releaseDate;
     private Duration duration;
-    private Set<Long> likes;
+    private Integer mpa;
+    private List<Integer> genres;
 
 }

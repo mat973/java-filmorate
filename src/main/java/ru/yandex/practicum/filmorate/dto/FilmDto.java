@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.dto;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
-import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
@@ -21,5 +23,21 @@ public class FilmDto {
     @Positive
     private Long duration;
 
-    private Set<Long> likes;
+    private MpaRating mpa;
+
+    private List<Genre> genres;
+
+
+    @Override
+    public String toString() {
+        return "FilmDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", releaseDate='" + releaseDate + '\'' +
+                ", duration=" + duration +
+                ", mpa='" + mpa + '\'' +
+                ", genres=" + genres +
+                '}';
+    }
 }
