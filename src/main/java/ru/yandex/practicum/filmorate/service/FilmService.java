@@ -98,16 +98,16 @@ public class FilmService {
 
         Mpa mpa = mpaService.getMpaById((long) filmDto.getMpa().getId());
 
-        List<ru.yandex.practicum.filmorate.dto.Genre> genres = Collections.emptyList();
+        List<Genre> genres = Collections.emptyList();
         if (filmDto.getGenres() != null && !filmDto.getGenres().isEmpty()) {
             Set<Long> genreIds = filmDto.getGenres().stream()
                     .map(genre -> (long) genre.getId())
                     .collect(Collectors.toSet());
 
-            List<ru.yandex.practicum.filmorate.dto.Genre> genreList = genreService.getGenresByIds(genreIds);
+            List<Genre> genreList = genreService.getGenresByIds(genreIds);
 
-            Map<Integer, ru.yandex.practicum.filmorate.dto.Genre> genreMap = genreList.stream()
-                    .collect(Collectors.toMap(ru.yandex.practicum.filmorate.dto.Genre::getId, genre -> genre));
+            Map<Integer, Genre> genreMap = genreList.stream()
+                    .collect(Collectors.toMap(Genre::getId, genre -> genre));
 
             genres = filmDto.getGenres().stream()
                     .map(x -> genreMap.get(x.getId()))
@@ -124,6 +124,10 @@ public class FilmService {
                 .releaseDate(filmDto.getReleaseDate())
                 .genres(genres)
                 .build();
+    }
+
+    public boolean contain(Long filmId){
+        return filmStorage.existById(filmId);
     }
 
 
