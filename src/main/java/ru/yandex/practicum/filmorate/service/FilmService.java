@@ -6,14 +6,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.FullFilm;
+import ru.yandex.practicum.filmorate.dto.Genre;
 import ru.yandex.practicum.filmorate.dto.Mpa;
 import ru.yandex.practicum.filmorate.exeption.DateIsToOldException;
 import ru.yandex.practicum.filmorate.exeption.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
 import ru.yandex.practicum.filmorate.exeption.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.Duration;
@@ -171,7 +170,7 @@ public class FilmService {
                     .name(film.getTitle())
                     .releaseDate(film.getReleaseDate().format(formater))
                     .duration(film.getDuration().getSeconds() / 60)
-                    .mpa(new MpaRating(film.getMpa()))
+                    .mpa(new Mpa(film.getMpa()))
                     .build();
         }
 
@@ -181,7 +180,7 @@ public class FilmService {
                 .name(film.getTitle())
                 .releaseDate(film.getReleaseDate().format(formater))
                 .duration(film.getDuration().getSeconds() / 60)
-                .mpa(new MpaRating(film.getMpa()))
+                .mpa(new Mpa(film.getMpa()))
                 .genres(film.getGenres().stream().map(Genre::new).collect(Collectors.toList()))
                 .build();
     }
