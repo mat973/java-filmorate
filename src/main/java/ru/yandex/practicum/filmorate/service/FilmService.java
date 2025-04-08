@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.FullFilm;
@@ -18,7 +16,12 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,7 +33,6 @@ public class FilmService {
     private final GenreService genreService;
     private final MpaService mpaService;
 
-    private final Logger log = LoggerFactory.getLogger(FilmService.class);
     private final LocalDate checkDate = LocalDate.of(1895, 12, 28);
     private static final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
