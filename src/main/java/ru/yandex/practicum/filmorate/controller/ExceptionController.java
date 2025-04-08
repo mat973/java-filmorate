@@ -110,4 +110,10 @@ public class ExceptionController {
     public ExceptionDto handleReviewNotFoundException(final ReviewNotFoundException e) {
         return new ExceptionDto(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionDto handleNotNegativeIdException(final NotNegativeIdException e){
+        return new ExceptionDto(e.getMessage());
+    }
 }

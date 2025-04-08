@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.anatation.NotNegative;
 
 @Data
 public class ReviewDto {
@@ -14,9 +15,9 @@ public class ReviewDto {
     @NotNull(message = "Тип коментария не может быть пустым.")
     Boolean isPositive;
     @NotNull(message = "Индификатор пользователя не может быть путсым.")
-    @Positive(message = "Индификатор пользователя должен быть положительным числом.")
+    @NotNegative(message = "Индификатор пользователя должен быть положительным числом.")
     Long userId;
     @NotNull(message = "Индификатор фильма не может быть пустым.")
-    @Positive(message = "Индификатор фильма должен быть положительным чилсом.")
+    @NotNegative(message = "Индификатор фильма должен быть положительным чилсом.")
     Long filmId;
 }
