@@ -107,7 +107,7 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionDto handleReviewNotFoundException(final  ReviewNotFoundException e){
+    public ExceptionDto handleReviewNotFoundException(final ReviewNotFoundException e) {
         return new ExceptionDto(e.getMessage());
     }
 }
