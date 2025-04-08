@@ -1,25 +1,27 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.FullFilm;
+import ru.yandex.practicum.filmorate.dto.Genre;
 import ru.yandex.practicum.filmorate.dto.Mpa;
 import ru.yandex.practicum.filmorate.exeption.DateIsToOldException;
 import ru.yandex.practicum.filmorate.exeption.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
 import ru.yandex.practicum.filmorate.exeption.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,7 +33,6 @@ public class FilmService {
     private final GenreService genreService;
     private final MpaService mpaService;
 
-    private final Logger log = LoggerFactory.getLogger(FilmService.class);
     private final LocalDate checkDate = LocalDate.of(1895, 12, 28);
     private static final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -99,16 +100,16 @@ public class FilmService {
 
         Mpa mpa = mpaService.getMpaById((long) filmDto.getMpa().getId());
 
-        List<ru.yandex.practicum.filmorate.dto.Genre> genres = Collections.emptyList();
+        List<Genre> genres = Collections.emptyList();
         if (filmDto.getGenres() != null && !filmDto.getGenres().isEmpty()) {
             Set<Long> genreIds = filmDto.getGenres().stream()
                     .map(genre -> (long) genre.getId())
                     .collect(Collectors.toSet());
 
-            List<ru.yandex.practicum.filmorate.dto.Genre> genreList = genreService.getGenresByIds(genreIds);
+            List<Genre> genreList = genreService.getGenresByIds(genreIds);
 
-            Map<Integer, ru.yandex.practicum.filmorate.dto.Genre> genreMap = genreList.stream()
-                    .collect(Collectors.toMap(ru.yandex.practicum.filmorate.dto.Genre::getId, genre -> genre));
+            Map<Integer, Genre> genreMap = genreList.stream()
+                    .collect(Collectors.toMap(Genre::getId, genre -> genre));
 
             genres = filmDto.getGenres().stream()
                     .map(x -> genreMap.get(x.getId()))
@@ -125,6 +126,10 @@ public class FilmService {
                 .releaseDate(filmDto.getReleaseDate())
                 .genres(genres)
                 .build();
+    }
+
+    public boolean contain(Long filmId) {
+        return filmStorage.existById(filmId);
     }
 
 
@@ -171,7 +176,7 @@ public class FilmService {
                     .name(film.getTitle())
                     .releaseDate(film.getReleaseDate().format(formater))
                     .duration(film.getDuration().getSeconds() / 60)
-                    .mpa(new MpaRating(film.getMpa()))
+                    .mpa(new Mpa(film.getMpa()))
                     .build();
         }
 
@@ -181,7 +186,7 @@ public class FilmService {
                 .name(film.getTitle())
                 .releaseDate(film.getReleaseDate().format(formater))
                 .duration(film.getDuration().getSeconds() / 60)
-                .mpa(new MpaRating(film.getMpa()))
+                .mpa(new Mpa(film.getMpa()))
                 .genres(film.getGenres().stream().map(Genre::new).collect(Collectors.toList()))
                 .build();
     }
