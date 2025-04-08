@@ -61,6 +61,7 @@ public class ReviewDbStorage implements ReviewStorage {
                        review_score rs ON r.review_id = rs.review_id
                    GROUP BY
                        r.review_id, r.content, r.positive, r.user_id, r.film_id
+                   ORDER BY r.review_id DESC
                    LIMIT ?
             """;
 
@@ -83,6 +84,7 @@ public class ReviewDbStorage implements ReviewStorage {
                        review_score rs ON r.review_id = rs.review_id
                    GROUP BY
                        r.review_id, r.content, r.positive, r.user_id, r.film_id
+                   ORDER BY r.review_id DESC
                    LIMIT ?
             """;
 

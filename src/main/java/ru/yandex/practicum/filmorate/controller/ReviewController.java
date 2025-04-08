@@ -80,7 +80,7 @@ public class ReviewController {
         reviewService.addDislikeToReview(reviewId, userId);
     }
 
-    @DeleteMapping("/reviews/{reviewId}/like/{userId}")
+    @DeleteMapping("/{reviewId}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteLikeToReview(@PathVariable Long reviewId, @PathVariable Long userId) {
         reviewService.deleteLikeFromReview(reviewId, userId);

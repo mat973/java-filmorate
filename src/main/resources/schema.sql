@@ -91,7 +91,7 @@ create table IF NOT EXISTS review(
 
 -- Таблица оценки отзывов
 create table IF NOT EXISTS review_score(
-    review_id bigint REFERENCES review (review_id),
+    review_id bigint REFERENCES review (review_id) ON DELETE CASCADE,
     user_id bigint REFERENCES users (user_id),
     isPositive BOOLEAN,
     PRIMARY KEY (review_id, user_id)
