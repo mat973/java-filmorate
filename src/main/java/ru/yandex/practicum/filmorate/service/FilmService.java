@@ -126,7 +126,7 @@ public class FilmService {
                 .build();
     }
 
-    public boolean contain(Long filmId){
+    public boolean contain(Long filmId) {
         return filmStorage.existById(filmId);
     }
 
