@@ -17,12 +17,12 @@ public class ReviewDbStorage implements ReviewStorage {
     private final ReviewRowMapper rowMapper;
 
 
-    private final String CREATE_REVIEW_QUERY =
+    private final static String CREATE_REVIEW_QUERY =
             "INSERT INTO review (content, positive, user_id, film_id) VALUES (?, ?, ?, ?)";
-    private final String EXIST_BY_ID_QUERY =
+    private final static String EXIST_BY_ID_QUERY =
             "SELECT COUNT(*) > 0 FROM review WHERE film_id = ?";
-    private final String UPDATE_QUERY = "UPDATE review SET CONTENT = ?, positive = ? where  review_id = ?";
-    private final String GET_BY_ID = """
+    private final static String UPDATE_QUERY = "UPDATE review SET CONTENT = ?, positive = ? where  review_id = ?";
+    private final static String GET_BY_ID = """
             SELECT
                 r.review_id,
                 r.content,
@@ -43,7 +43,7 @@ public class ReviewDbStorage implements ReviewStorage {
             GROUP BY
                 r.review_id, r.content, r.positive, r.user_id, r.film_id
             """;
-    private final String GET_ALL_WITH_LIMIT_QUERY = """
+    private final static String GET_ALL_WITH_LIMIT_QUERY = """
             SELECT r.review_id,
                    r.content,
                    r.positive
@@ -63,7 +63,7 @@ public class ReviewDbStorage implements ReviewStorage {
                    LIMIT ?
             """;
 
-    private final String GET_ALL_WITH_LIMIT_AND_FILM_ID_QUERY = """
+    private final static String GET_ALL_WITH_LIMIT_AND_FILM_ID_QUERY = """
             SELECT r.review_id,
                    r.content,
                    r.positive
@@ -85,27 +85,27 @@ public class ReviewDbStorage implements ReviewStorage {
                    LIMIT ?
             """;
 
-    private final String ADD_LIKE_QUERY = """
+    private final static String ADD_LIKE_QUERY = """
             MERGE INTO review_score (review_id, user_id, isPositive)
             KEY (review_id, user_id)
             VALUES (?, ?, TRUE);
             """;
 
-    private final String ADD_DISLIKE_QUERY = """
+    private final static String ADD_DISLIKE_QUERY = """
                          MERGE INTO review_score (review_id, user_id, isPositive)
             KEY (review_id, user_id)
             VALUES (?, ?, FALSE)
             """;
 
-    private final String DELETE_LIKE_QUERY = """
+    private final static String DELETE_LIKE_QUERY = """
             DELETE FROM review_score WHERE review_id = ? AND user_id = ? AND isPositive = TRUE
             """;
 
-    private final String DELETE_DISLIKE_QUERY = """
+    private final static String DELETE_DISLIKE_QUERY = """
             DELETE FROM review_score WHERE review_id = ? AND user_id = ? AND isPositive = FALSE
             """;
 
-    private final String DELETE_BY_ID_QUERY = "DELETE FROM review WHERE review_id = ?";
+    private final static String DELETE_BY_ID_QUERY = "DELETE FROM review WHERE review_id = ?";
 
     @Override
     public Review create(Review review) {
