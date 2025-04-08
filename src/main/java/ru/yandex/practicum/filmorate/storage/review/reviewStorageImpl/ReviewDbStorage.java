@@ -19,7 +19,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     private static final String CREATE_REVIEW_QUERY =
             "INSERT INTO review (content, positive, user_id, film_id) VALUES (?, ?, ?, ?)";
-    private final static String EXIST_BY_ID_QUERY =
+    private static final String EXIST_BY_ID_QUERY =
             "SELECT COUNT(*) > 0 FROM review WHERE film_id = ?";
     private static final String UPDATE_QUERY = "UPDATE review SET CONTENT = ?, positive = ? where  review_id = ?";
     private static final String GET_BY_ID = """
