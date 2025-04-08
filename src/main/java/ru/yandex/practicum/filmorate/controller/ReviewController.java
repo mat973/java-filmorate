@@ -27,11 +27,11 @@ public class ReviewController {
         return reviewService.create(reviewDto);
     }
 
-    @PutMapping("/{reviewId}")
+    @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public Review updateReview(@Valid @RequestBody ReviewDto reviewDto, @PathVariable Long reviewId) {
-        log.info("Обновления отзыва с id {}", reviewId);
-        return reviewService.update(reviewDto, reviewId);
+    public Review updateReview(@Valid @RequestBody ReviewDto reviewDto) {
+        log.info("Обновления отзыва с id {}", reviewDto.getReviewId());
+        return reviewService.update(reviewDto, reviewDto.getReviewId());
     }
 
     @DeleteMapping("/{reviewId}")

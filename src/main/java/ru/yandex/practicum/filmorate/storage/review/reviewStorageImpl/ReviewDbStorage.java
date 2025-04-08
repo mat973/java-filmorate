@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 
+import javax.swing.*;
 import java.sql.PreparedStatement;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class ReviewDbStorage implements ReviewStorage {
     private static final String CREATE_REVIEW_QUERY =
             "INSERT INTO review (content, positive, user_id, film_id) VALUES (?, ?, ?, ?)";
     private static final String EXIST_BY_ID_QUERY =
-            "SELECT COUNT(*) > 0 FROM review WHERE film_id = ?";
+            "SELECT COUNT(*) > 0 FROM review WHERE review_id = ?";
     private static final String UPDATE_QUERY = "UPDATE review SET CONTENT = ?, positive = ? where  review_id = ?";
     private static final String GET_BY_ID = """
             SELECT
@@ -46,9 +47,9 @@ public class ReviewDbStorage implements ReviewStorage {
     private static final String GET_ALL_WITH_LIMIT_QUERY = """
             SELECT r.review_id,
                    r.content,
-                   r.positive
-                   r.user_id
-                   r.film_id
+                   r.positive,
+                   r.user_id,
+                   r.film_id,
                    COALESCE(SUM(CASE
                         WHEN rs.isPositive = TRUE THEN 1
                         WHEN rs.isPositive = FALSE THEN -1
@@ -59,16 +60,16 @@ public class ReviewDbStorage implements ReviewStorage {
                    LEFT JOIN
                        review_score rs ON r.review_id = rs.review_id
                    GROUP BY
-                       r.review_id, r.content, r.positive, r.user_id, r.film_id;
+                       r.review_id, r.content, r.positive, r.user_id, r.film_id
                    LIMIT ?
             """;
 
     private static final String GET_ALL_WITH_LIMIT_AND_FILM_ID_QUERY = """
             SELECT r.review_id,
                    r.content,
-                   r.positive
-                   r.user_id
-                   r.film_id
+                   r.positive,
+                   r.user_id,
+                   r.film_id,
                    COALESCE(SUM(CASE
                         WHEN rs.isPositive = TRUE THEN 1
                         WHEN rs.isPositive = FALSE THEN -1
@@ -81,7 +82,7 @@ public class ReviewDbStorage implements ReviewStorage {
                    LEFT JOIN
                        review_score rs ON r.review_id = rs.review_id
                    GROUP BY
-                       r.review_id, r.content, r.positive, r.user_id, r.film_id;
+                       r.review_id, r.content, r.positive, r.user_id, r.film_id
                    LIMIT ?
             """;
 
@@ -125,7 +126,8 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Boolean existById(Long reviewId) {
-        return jdbc.queryForObject(EXIST_BY_ID_QUERY, Boolean.class, reviewId);
+        Boolean check = jdbc.queryForObject(EXIST_BY_ID_QUERY, Boolean.class, reviewId);
+        return check;
     }
 
     @Override

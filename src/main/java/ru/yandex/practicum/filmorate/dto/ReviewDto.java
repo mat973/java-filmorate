@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 public class ReviewDto {
+    Long reviewId;
     @NotNull
     @NotBlank(message = "Отзыв не может быть пустым.")
     String content;
