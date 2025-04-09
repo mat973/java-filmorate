@@ -132,6 +132,15 @@ public class FilmService {
         return filmStorage.existById(filmId);
     }
 
+    public List<FilmDto> getRecommendation(Long userId) {
+        if (userId == null || !userService.contain(userId)) {
+            throw new UserNotFoundException("Пользователя не может быть с пустым filmId");
+        }
+        return filmStorage.getRecommendations(userId).stream()
+                .map(FilmService::mapToFilDto)
+                .collect(Collectors.toList());
+    }
+
 
     private Film mapToFilm(FilmDto filmDto) {
         LocalDate date = LocalDate.parse(filmDto.getReleaseDate(), formater);

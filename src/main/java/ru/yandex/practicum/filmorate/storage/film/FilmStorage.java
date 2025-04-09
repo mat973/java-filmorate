@@ -22,5 +22,5 @@ public interface FilmStorage {
 
     void dislike(Long filmId, Long userId);
 
-
+    List<Film> getRecommendations(Long userId);
 }

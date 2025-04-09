@@ -112,6 +112,59 @@ public class FilmDbStorage implements FilmStorage {
             GROUP BY f.film_id, r.rating_id
             """;
 
+    private static final String GET_RECOMMENDATION_QUERY = """
+            SELECT\s
+              f.film_id,\s
+              f.title,\s
+              f.description,\s
+              f.release_date,\s
+              f.duration,\s
+              f.rating_id,\s
+              STRING_AGG(fg.genre_id, ',') AS genres\s
+            FROM\s
+              films f\s
+              JOIN ratings r ON f.rating_id = r.rating_id\s
+              JOIN film_genre fg ON f.film_id = fg.film_id\s
+              LEFT JOIN film_likes fl ON fl.film_id = f.film_id\s
+            WHERE\s
+              f.film_id IN (
+                SELECT\s
+                  fl.film_id\s
+                FROM\s
+                  FILM_LIKES fl\s
+                WHEre\s
+                  fl.user_id IN (
+                    SELECT\s
+                      fl1.USER_ID\s
+                    FROM\s
+                      FILM_LIKES fl\s
+                      LEFT JOIN FILM_LIKES fl1 ON fl.FILM_ID = fl1.FILM_ID\s
+                    WHERE\s
+                      fl.USER_ID = ?\s
+                      AND fl1.USER_ID <> ?\s
+                    GROUP BY\s
+                      fl1.USER_ID\s
+                    ORDER BY\s
+                      count(*) DESC\s
+                    LIMIT\s
+                      1
+                  ) AND fl.FILM_ID NOT IN (
+                    SELECT\s
+                      fl.film_id\s
+                    FROM\s
+                      FILM_LIKES fl\s
+                    WHERE\s
+                      fl.user_id = ?
+                  )
+              )\s
+            GROUP BY\s
+              f.film_id\s
+            ORDER BY\s
+              COUNT(fl.user_id) DESC,\s
+              f.film_id ASC
+            
+            """;
+
     @Override
     public Film save(Film film) {
         if (jdbc.queryForObject(EXIST_MPA_BY_ID_QUERY, Integer.class, film.getMpa()) == 0) {
@@ -196,5 +249,9 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getPopularFilms(Integer count) {
         return jdbc.query(GET_POPULAR_FILMS_QUERY, filmRowMapper, count);
+    }
+
+    public List<Film> getRecommendations(Long userId) {
+        return jdbc.query(GET_RECOMMENDATION_QUERY, filmRowMapper, userId, userId, userId);
     }
 }
