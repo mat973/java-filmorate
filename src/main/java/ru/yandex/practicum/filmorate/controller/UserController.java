@@ -5,8 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
 @Slf4j
 public class UserController {
     private final UserService userService;
+    private final FilmService filmService;
 
 
     @PostMapping()
@@ -76,6 +79,13 @@ public class UserController {
         log.info("Выполнение запроса по вывода списка общх друзей двух пользователий userid {} и otherUserId {}",
                 userId, otherUserId);
         return userService.getCommonFriends(userId, otherUserId);
+    }
+
+    @GetMapping("{userId}/recommendations")
+    @ResponseStatus(HttpStatus.OK)
+    public List<FilmDto> getRecommendation(@PathVariable Long userId) {
+        log.info("Запрос на получение рекомендаций для пользователя с id {}", userId);
+        return filmService.getRecommendation(userId);
     }
 
 
