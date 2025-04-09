@@ -162,7 +162,6 @@ public class FilmDbStorage implements FilmStorage {
             ORDER BY\s
               COUNT(fl.user_id) DESC,\s
               f.film_id ASC
-            
             """;
 
     @Override
