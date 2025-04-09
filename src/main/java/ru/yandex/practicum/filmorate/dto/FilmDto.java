@@ -25,6 +25,8 @@ public class FilmDto {
 
     private List<Genre> genres;
 
+    private List<Genre> director;
+
 
     @Override
     public String toString() {
