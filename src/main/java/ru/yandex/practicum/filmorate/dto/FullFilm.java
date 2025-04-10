@@ -15,4 +15,5 @@ public class FullFilm {
     private Long duration;
     private Mpa mpa;
     private List<Genre> genres;
+    private String directors;
 }

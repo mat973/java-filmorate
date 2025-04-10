@@ -18,9 +18,13 @@ public interface FilmStorage {
 
     List<Film> getAllFilms();
 
+    List<Film> getFilmsByName(String query);
+
+    List<Film> getFilmsByDirector(String query);
+
+    List<Film> getFilmsByNameAndDirector(String query);
+
     void addLike(Long filmId, Long userId);
 
     void dislike(Long filmId, Long userId);
-
-
 }

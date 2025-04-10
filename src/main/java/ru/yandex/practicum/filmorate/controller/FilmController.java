@@ -18,6 +18,7 @@ import java.util.Optional;
 @RequestMapping("/films")
 public class FilmController {
     private final Logger log = LoggerFactory.getLogger(FilmController.class);
+
     @Autowired
     private FilmService filmService;
 
@@ -27,16 +28,13 @@ public class FilmController {
         log.debug("Начало обработки запроса на создание фильма: {}", filmDto);
         log.warn(filmDto.toString());
         return filmService.createFilm(filmDto);
-
     }
 
     @PutMapping()
     @ResponseStatus(HttpStatus.OK)
     public FilmDto updateFilm(@Valid @RequestBody FilmDto filmDto) {
         log.debug("Начало обработки запроса на обновление фильма: {}", filmDto);
-
         return filmService.updateFilm(filmDto);
-
     }
 
     @GetMapping()
@@ -53,17 +51,26 @@ public class FilmController {
         return filmService.getFilmWithGenre(filmId);
     }
 
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<FilmDto> getFilmsByNameOrDirector(@RequestParam(required = false) String query, @RequestParam List<String> by) {
+        log.debug("Запрос на поиск фильмов с параметрами: {}, {}", query, by);
+        List<FilmDto> films = filmService.getFilmsByNameOrDirector(query, by);
+        log.info("Вернули список фильмов: {}", films);
+        return films;
+    }
+
     @PutMapping("/{filmId}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        log.info("Запрос на добавление лйка фильму с filmId {} от пользоватля с userId {}", filmId, userId);
+        log.info("Запрос на добавление лйка фильму с filmId {} от пользователя с userId {}", filmId, userId);
         filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        log.info("Запрос на удаление лйка фильму с filmId {} от пользоватля с userId {}", filmId, userId);
+        log.info("Запрос на удаление лйка фильму с filmId {} от пользователя с userId {}", filmId, userId);
         filmService.deleteLike(filmId, userId);
     }
 
@@ -78,8 +85,5 @@ public class FilmController {
             countt = count.get();
         }
         return filmService.getPopularFilms(countt);
-
     }
-
-
 }

@@ -25,7 +25,9 @@ public class FilmRowMapper implements RowMapper<Film> {
                 .mpa(rs.getInt("rating_id"))
                 .genres(rs.getString("genres") == null ?
                         null : Arrays.stream((rs.getString("genres").split(","))).sequential()
-                        .map(Integer::parseInt).collect(Collectors.toList()))
+                        .map(Integer::parseInt)
+                        .collect(Collectors.toList()))
+                .directors(rs.getString("directors"))
                 .build();
     }
 }

@@ -20,11 +20,9 @@ public class FilmDto {
     @NotNull(message = "Продолжительность не можеть быть пустой.")
     @Positive
     private Long duration;
-
     private Mpa mpa;
-
     private List<Genre> genres;
-
+    private String directors;
 
     @Override
     public String toString() {
@@ -35,7 +33,8 @@ public class FilmDto {
                 ", releaseDate='" + releaseDate + '\'' +
                 ", duration=" + duration +
                 ", mpa='" + mpa + '\'' +
-                ", genres=" + genres +
+                ", genres=" + genres + '\'' +
+                ", directors='" + directors +
                 '}';
     }
 }
