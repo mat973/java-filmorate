@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dto;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.List;
 
@@ -25,19 +26,7 @@ public class FilmDto {
 
     private List<Genre> genres;
 
-    private List<Genre> director;
+    private List<Director> director;
 
 
-    @Override
-    public String toString() {
-        return "FilmDto{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", releaseDate='" + releaseDate + '\'' +
-                ", duration=" + duration +
-                ", mpa='" + mpa + '\'' +
-                ", genres=" + genres +
-                '}';
-    }
 }

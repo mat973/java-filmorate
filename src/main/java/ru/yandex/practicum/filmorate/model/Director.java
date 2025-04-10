@@ -6,4 +6,8 @@ import lombok.Data;
 public class Director {
     private Long directorId;
     private String name;
+
+    public Director(Long directorId) {
+        this.directorId = directorId;
+    }
 }
