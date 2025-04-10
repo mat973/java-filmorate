@@ -8,11 +8,13 @@ public interface DirectorDbStorage {
 
     List<Director> getDirectors();
 
-    Director getDirectorById(Long id);
+    Director getDirectorById(Long directorId);
 
     Director updateDirector(Director director);
 
     Director saveDirector(Director director);
 
     void deleteDirector(Long directorId);
+
+    Boolean existDirector(Long directorId);
 }

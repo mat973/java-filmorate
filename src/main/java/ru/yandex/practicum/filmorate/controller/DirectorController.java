@@ -37,5 +37,11 @@ public class DirectorController {
     public void deleteDirector(@PathVariable Long directorId){
         directorService.deleteDirector(directorId);
     }
+
+    @PutMapping
+    @ResponseStatus(HttpStatus.OK)
+    public Director updateDirector(Director director){
+        return directorService.updateDirector(director);
+    }
 }
 

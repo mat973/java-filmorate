@@ -161,7 +161,6 @@ public class FilmService {
                     .title(filmDto.getName())
                     .releaseDate(date)
                     .mpa(filmDto.getMpa().getId())
-                    .director(filmDto.getDirector().stream().map(Director::getDirectorId).collect(Collectors.toList()))
                     .build();
         }
 
@@ -174,7 +173,6 @@ public class FilmService {
                 .releaseDate(date)
                 .mpa(filmDto.getMpa().getId())
                 .genres(filmDto.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()).stream().toList())
-                .director(filmDto.getDirector().stream().map(Director::getDirectorId).collect(Collectors.toList()))
                 .build();
     }
 
@@ -189,7 +187,7 @@ public class FilmService {
                     .releaseDate(film.getReleaseDate().format(formater))
                     .duration(film.getDuration().getSeconds() / 60)
                     .mpa(new Mpa(film.getMpa()))
-                    .director(film.getDirector().stream().map(Director::new).collect(Collectors.toList()))
+//                    .director(film.getDirector().stream().map(Director::new).collect(Collectors.toList()))
                     .build();
         }
 
@@ -201,7 +199,7 @@ public class FilmService {
                 .duration(film.getDuration().getSeconds() / 60)
                 .mpa(new Mpa(film.getMpa()))
                 .genres(film.getGenres().stream().map(Genre::new).collect(Collectors.toList()))
-                .director(film.getDirector().stream().map(Director::new).collect(Collectors.toList()))
+ //               .director(film.getDirector().stream().map(Director::new).collect(Collectors.toList()))
                 .build();
     }
 
