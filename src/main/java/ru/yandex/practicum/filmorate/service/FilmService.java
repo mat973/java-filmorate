@@ -16,12 +16,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +30,6 @@ public class FilmService {
 
     private final LocalDate checkDate = LocalDate.of(1895, 12, 28);
     private static final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
 
     public FilmDto createFilm(FilmDto filmDto) {
         Film film = filmStorage.save(mapToFilm(filmDto));
@@ -53,7 +47,6 @@ public class FilmService {
 
         return mapToFilDto(filmStorage.update(newFilm));
     }
-
 
     public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
@@ -85,13 +78,6 @@ public class FilmService {
         }
 
         filmStorage.dislike(filmId, userId);
-    }
-
-    public List<FilmDto> getPopularFilms(Integer count) {
-
-        return filmStorage.getPopularFilms(count).stream()
-                .map(FilmService::mapToFilDto)
-                .collect(Collectors.toList());
     }
 
     public FullFilm getFilmWithGenre(Long filmId) {
@@ -141,7 +127,6 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-
     private Film mapToFilm(FilmDto filmDto) {
         LocalDate date = LocalDate.parse(filmDto.getReleaseDate(), formater);
         if (date.isBefore(checkDate)) {
@@ -163,7 +148,6 @@ public class FilmService {
                     .build();
         }
 
-
         return Film.builder()
                 .id(filmDto.getId())
                 .description(filmDto.getDescription())
@@ -174,7 +158,6 @@ public class FilmService {
                 .genres(filmDto.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()).stream().toList())
                 .build();
     }
-
 
     private static FilmDto mapToFilDto(Film film) {
 
@@ -200,5 +183,9 @@ public class FilmService {
                 .build();
     }
 
-
+    public List<FilmDto> getPopularFilms(Integer count, Integer genreId, Integer year) {
+        return filmStorage.getPopularFilms(count, genreId, year).stream()
+                .map(FilmService::mapToFilDto)
+                .collect(Collectors.toList());
+    }
 }
