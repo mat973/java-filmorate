@@ -108,3 +108,12 @@ create table if NOT EXISTS director_film(
     film_id bigint REFERENCES films (film_id) ON DELETE CASCADE,
     PRIMARY KEY (director_id, film_id)
 );
+
+--INSERT INTO director (name)
+--SELECT 'Комедия1' WHERE NOT EXISTS (SELECT 1 FROM director WHERE name = 'Комедия1');
+--INSERT INTO director (name)
+--SELECT 'Комедия2' WHERE NOT EXISTS (SELECT 1 FROM director WHERE name = 'Комедия2');
+--INSERT INTO director (name)
+--SELECT 'Комедия3' WHERE NOT EXISTS (SELECT 1 FROM director WHERE name = 'Комедия3');
+--INSERT INTO director (name)
+--SELECT 'Комедия4' WHERE NOT EXISTS (SELECT 1 FROM director WHERE name = 'Комедия4');

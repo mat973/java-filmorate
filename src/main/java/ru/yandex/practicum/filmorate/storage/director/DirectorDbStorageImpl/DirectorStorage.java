@@ -21,10 +21,16 @@ public class DirectorStorage implements DirectorDbStorage {
 
     private static final String EXIST_BY_ID_QUERY = "SELECT COUNT(*) > 0 FROM director WHERE director_id = ?";
     private static final String FIND_ALL_QUERY = "SELECT * FROM director";
-    private static final String INSERT_QUERY = "INSERT INTO director (name) value (?)";
+    private static final String INSERT_QUERY = "INSERT INTO director (name) values (?)";
     private static final String GET_DIRECTOR_BY_ID = "SELECT * FROM director WHERE director_id = ?";
     private static final String UPDATE_QUERY = "UPDATE director SET name = ? where director_id = ?";
     private static final String DELETE_QUERY = "DELETE FROM director WHERE ?";
+    private static final String GET_DIRECTOR_BY_FILM_ID_QUERY  = """
+            SELECT d.DIRECTOR_ID , d.NAME
+            from DIRECTOR d
+            join DIRECTOR_FILM df  on d.director_id = df.director_id
+            where df.film_id = ?
+    """;
     @Override
     public List<Director> getDirectors() {
         return jdbc.query(FIND_ALL_QUERY, rowMapper);
@@ -37,7 +43,7 @@ public class DirectorStorage implements DirectorDbStorage {
 
     @Override
     public Director updateDirector(Director director) {
-        jdbc.update(UPDATE_QUERY, director.getName(), director.getDirectorId());
+        jdbc.update(UPDATE_QUERY, director.getName(), director.getId());
         return director;
     }
 
@@ -50,7 +56,7 @@ public class DirectorStorage implements DirectorDbStorage {
             return ps;
         }, keyHolder);
 
-        director.setDirectorId(keyHolder.getKey().longValue());
+        director.setId(keyHolder.getKey().longValue());
         return director;
     }
 
@@ -62,5 +68,10 @@ public class DirectorStorage implements DirectorDbStorage {
     @Override
     public Boolean existDirector(Long directorId) {
         return Boolean.TRUE.equals(jdbc.queryForObject(EXIST_BY_ID_QUERY, Boolean.class, directorId));
+    }
+
+    @Override
+    public List<Director> getDirectorsByFilmId(Long filmId) {
+        return jdbc.query(GET_DIRECTOR_BY_FILM_ID_QUERY,rowMapper, filmId);
     }
 }

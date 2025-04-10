@@ -33,6 +33,7 @@ public class FilmService {
     private final UserService userService;
     private final GenreService genreService;
     private final MpaService mpaService;
+    private final DirectorService directorService;
 
     private final LocalDate checkDate = LocalDate.of(1895, 12, 28);
     private static final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -116,6 +117,7 @@ public class FilmService {
                     .map(x -> genreMap.get(x.getId()))
                     .filter(Objects::nonNull)
                     .toList();
+            List<Director> directors = directorService.getDirectorsByFilmId(filmId);
         }
 
         return FullFilm.builder()
@@ -187,7 +189,6 @@ public class FilmService {
                     .releaseDate(film.getReleaseDate().format(formater))
                     .duration(film.getDuration().getSeconds() / 60)
                     .mpa(new Mpa(film.getMpa()))
-//                    .director(film.getDirector().stream().map(Director::new).collect(Collectors.toList()))
                     .build();
         }
 
@@ -199,7 +200,6 @@ public class FilmService {
                 .duration(film.getDuration().getSeconds() / 60)
                 .mpa(new Mpa(film.getMpa()))
                 .genres(film.getGenres().stream().map(Genre::new).collect(Collectors.toList()))
- //               .director(film.getDirector().stream().map(Director::new).collect(Collectors.toList()))
                 .build();
     }
 

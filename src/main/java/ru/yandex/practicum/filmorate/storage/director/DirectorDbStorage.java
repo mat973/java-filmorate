@@ -17,4 +17,6 @@ public interface DirectorDbStorage {
     void deleteDirector(Long directorId);
 
     Boolean existDirector(Long directorId);
+
+    List<Director> getDirectorsByFilmId(Long filmId);
 }
