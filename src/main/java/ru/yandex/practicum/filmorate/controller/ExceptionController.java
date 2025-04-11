@@ -116,4 +116,10 @@ public class ExceptionController {
     public ExceptionDto handleNotNegativeIdException(final NotNegativeIdException e) {
         return new ExceptionDto(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto handleException(final IllegalArgumentException e) {
+        return new ExceptionDto(e.getMessage());
+    }
 }

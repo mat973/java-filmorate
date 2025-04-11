@@ -12,7 +12,7 @@ public interface FilmStorage {
 
     Optional<Film> find(Long filmId);
 
-    List<Film> getPopularFilms(Integer count);
+    List<Film> getPopularFilms(Integer count, Integer genreId, Integer year);
 
     Boolean existById(Long filmId);
 
