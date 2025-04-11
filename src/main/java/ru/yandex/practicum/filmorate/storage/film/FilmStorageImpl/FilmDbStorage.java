@@ -74,29 +74,29 @@ public class FilmDbStorage implements FilmStorage {
     private static final String SET_DISLIKE_QUERY = "DELETE FROM FILM_LIKES WHERE user_id = ? AND FILM_ID = ?";
 
     private static final String GET_POPULAR_FILMS_QUERY = """
-            SELECT
-                f.film_id,
-                f.title,
-                f.description,
-                f.release_date,
-                f.duration,
-                f.rating_id,
-                STRING_AGG(fg.genre_id, ',') AS genres,
-                STRING_AGG(df.DIRECTOR_ID, ',') AS directors
-            FROM films f
-            JOIN ratings r ON f.rating_id = r.rating_id
-            JOIN film_genre fg ON f.film_id = fg.film_id
-            LEFT JOIN film_likes fl ON fl.film_id = f.film_id
-            LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
-            WHERE
-                (fg.genre_id = ? OR ? IS NULL)  -- Условие для фильтрации по жанру
-                AND (EXTRACT(YEAR FROM f.release_date) = ? OR ? IS NULL)  -- Условие для фильтрации по году
-            GROUP BY f.film_id
-            ORDER BY
-                COUNT(fl.user_id) DESC,
-                f.film_id ASC
-            LIMIT ?
-    """;
+                    SELECT
+                        f.film_id,
+                        f.title,
+                        f.description,
+                        f.release_date,
+                        f.duration,
+                        f.rating_id,
+                        STRING_AGG(fg.genre_id, ',') AS genres,
+                        STRING_AGG(df.DIRECTOR_ID, ',') AS directors
+                    FROM films f
+                    JOIN ratings r ON f.rating_id = r.rating_id
+                    JOIN film_genre fg ON f.film_id = fg.film_id
+                    LEFT JOIN film_likes fl ON fl.film_id = f.film_id
+                    LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
+                    WHERE
+                        (fg.genre_id = ? OR ? IS NULL)  -- Условие для фильтрации по жанру
+                        AND (EXTRACT(YEAR FROM f.release_date) = ? OR ? IS NULL)  -- Условие для фильтрации по году
+                    GROUP BY f.film_id
+                    ORDER BY
+                        COUNT(fl.user_id) DESC,
+                        f.film_id ASC
+                    LIMIT ?
+            """;
 
     private static final String EXIST_BY_ID_QUERY = "SELECT COUNT(*) > 0 FROM films WHERE film_id = ?";
     private static final String EXIST_MPA_BY_ID_QUERY = "SELECT COUNT(*) FROM ratings WHERE rating_id = ?";
@@ -199,7 +199,7 @@ public class FilmDbStorage implements FilmStorage {
             ORDER BY\s
               f.release_date
             """;
-    private final static String GET_DIRECTOR_FILM_SORT_BY_LIKES = """
+    private static final String GET_DIRECTOR_FILM_SORT_BY_LIKES = """
             SELECT\s
               f.film_id,\s
               f.title,\s
