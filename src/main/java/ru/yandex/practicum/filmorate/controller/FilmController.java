@@ -71,9 +71,13 @@ public class FilmController {
             @RequestParam(defaultValue = "10") Integer count,
             @RequestParam(required = false) Integer genreId,
             @RequestParam(required = false) Integer year) {
-
         log.info("Запрос на получение популярных фильмов с количеством {}, жанром {} и годом {}", count, genreId, year);
-
         return filmService.getPopularFilms(count, genreId, year);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<FilmDto> getFimByDirectorId(@PathVariable Long directorId, @RequestParam String sortBy) {
+        log.info("Запрос на получение фильмов режисера с id {} тсартированных по {}", directorId, sortBy);
+        return filmService.getFilmsByDirectorId(directorId, sortBy);
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 
-import javax.swing.*;
 import java.sql.PreparedStatement;
 import java.util.List;
 

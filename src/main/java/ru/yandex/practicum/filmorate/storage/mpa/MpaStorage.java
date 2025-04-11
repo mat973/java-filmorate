@@ -34,4 +34,8 @@ public class MpaStorage {
     public List<Mpa> getAllMpa() {
         return jdbc.query(GET_ALL_MPA_QUERY, rowMapper);
     }
+
+    public Boolean existMpa(Integer mpaId) {
+        return jdbc.queryForObject(EXIST_MPA_BY_ID_QUERY, Integer.class, mpaId) != 0;
+    }
 }

@@ -26,6 +26,9 @@ public class FilmRowMapper implements RowMapper<Film> {
                 .genres(rs.getString("genres") == null ?
                         null : Arrays.stream((rs.getString("genres").split(","))).sequential()
                         .map(Integer::parseInt).collect(Collectors.toList()))
+                .directors(rs.getString("directors") == null ?
+                        null : Arrays.stream((rs.getString("directors").split(","))).sequential()
+                        .map(Long::parseLong).collect(Collectors.toList()))
                 .build();
     }
 }

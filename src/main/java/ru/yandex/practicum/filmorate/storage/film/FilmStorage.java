@@ -23,4 +23,12 @@ public interface FilmStorage {
     void dislike(Long filmId, Long userId);
 
     List<Film> getRecommendations(Long userId);
+
+
+    List<Film> getDirectorFilmSortByYear(Long directorId);
+
+    List<Film> getDirectorFilmSortByLikes(Long directorId);
 }
+
+
+

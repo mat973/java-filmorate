@@ -118,6 +118,24 @@ public class ExceptionController {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionDto handleDirectorNotExistException(final DirectorNotExistException e) {
+        return new ExceptionDto(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto handleDirectorMustHaveNameException(final DirectorMustHaveNameException e) {
+        return new ExceptionDto(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto handleSortByNotCorrectException(final SortByNotCorrectException e) {
+        return new ExceptionDto(e.getMessage());
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionDto handleException(final IllegalArgumentException e) {
         return new ExceptionDto(e.getMessage());

@@ -71,24 +71,28 @@ public class ReviewController {
     @PutMapping("/{reviewId}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void addLikeToReview(@PathVariable Long reviewId, @PathVariable Long userId) {
+        log.info("Запрос на оставление лайка от пользователя с UserId {} на отзыв с reviewId {}", userId, reviewId);
         reviewService.addLikeToReview(reviewId, userId);
     }
 
     @PutMapping("/{reviewId}/dislike/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void addDislikeToReview(@PathVariable Long reviewId, @PathVariable Long userId) {
+        log.info("Запрос на установление дизлайка ползователм с userId {} на по сто с reviewId {}", userId, reviewId);
         reviewService.addDislikeToReview(reviewId, userId);
     }
 
     @DeleteMapping("/{reviewId}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteLikeToReview(@PathVariable Long reviewId, @PathVariable Long userId) {
+        log.info("Запрос на удаление лайка пользователя userId {} на пост reviewId {}", userId, reviewId);
         reviewService.deleteLikeFromReview(reviewId, userId);
     }
 
     @DeleteMapping("/{reviewId}/dislike/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteDislikeToReview(@PathVariable Long reviewId, @PathVariable Long userId) {
+        log.info("Запрос на удаление дизлайка пользователя userId {} на пост reviewId {}", userId, reviewId);
         reviewService.deleteDisLikeFromReview(reviewId, userId);
     }
 
