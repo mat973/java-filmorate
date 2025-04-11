@@ -5,6 +5,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exeption.FilmNotUpdateException;
 import ru.yandex.practicum.filmorate.exeption.GenreNotExistException;
 import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
@@ -174,6 +175,56 @@ public class FilmDbStorage implements FilmStorage {
               f.film_id ASC
             """;
 
+    private static final String GET_DIRECTORS_FILM_SORT_BY_YEAR = """
+            SELECT\s
+              f.film_id,\s
+              f.title,\s
+              f.description,\s
+              f.release_date,\s
+              f.duration,\s
+              f.RATING_ID AS rating_id,\s
+              STRING_AGG(fg.genre_id, ',') AS genres,\s
+              STRING_AGG(df.DIRECTOR_ID, ',') AS directors\s
+            FROM\s
+              films f\s
+              JOIN ratings r ON f.rating_id = r.rating_id\s
+              LEFT JOIN film_genre fg ON f.film_id = fg.film_id\s
+              LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID\s
+            WHERE\s
+              df.DIRECTOR_ID = ?\s
+            GROUP BY\s
+              f.film_id\s
+            ORDER BY\s
+              f.release_date
+            """;
+    private final static String GET_DIRECTOR_FILM_SORT_BY_LIKES = """
+            SELECT\s
+              f.film_id,\s
+              f.title,\s
+              f.description,\s
+              f.release_date,\s
+              f.duration,\s
+              f.rating_id,\s
+              GROUP_CONCAT(DISTINCT fg.genre_id) AS genres,\s
+              GROUP_CONCAT(DISTINCT df.director_id) AS directors\s
+            FROM\s
+              films f\s
+              JOIN director_film df ON f.film_id = df.film_id\s
+              LEFT JOIN film_genre fg ON f.film_id = fg.film_id\s
+              LEFT JOIN film_likes fl ON f.film_id = fl.film_id\s
+            WHERE\s
+              df.director_id = ?\s
+            GROUP BY\s
+              f.film_id,\s
+              f.title,\s
+              f.description,\s
+              f.release_date,\s
+              f.duration,\s
+              f.rating_id\s
+            ORDER BY\s
+              COUNT(fl.user_id) DESC
+            """;
+
     @Override
     public Film save(Film film) {
         if (jdbc.queryForObject(EXIST_MPA_BY_ID_QUERY, Integer.class, film.getMpa()) == 0) {
@@ -269,5 +320,15 @@ public class FilmDbStorage implements FilmStorage {
 
     public List<Film> getRecommendations(Long userId) {
         return jdbc.query(GET_RECOMMENDATION_QUERY, filmRowMapper, userId, userId, userId);
+    }
+
+    @Override
+    public List<Film> getDirectorFilmSortByYear(Long directorId) {
+        return jdbc.query(GET_DIRECTORS_FILM_SORT_BY_YEAR, filmRowMapper, directorId);
+    }
+
+    @Override
+    public List<Film> getDirectorFilmSortByLikes(Long directorId) {
+        return jdbc.query(GET_DIRECTOR_FILM_SORT_BY_LIKES, filmRowMapper, directorId);
     }
 }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
@@ -23,4 +24,8 @@ public interface FilmStorage {
     void dislike(Long filmId, Long userId);
 
     List<Film> getRecommendations(Long userId);
+
+    List<Film> getDirectorFilmSortByYear(Long directorId);
+
+    List<Film> getDirectorFilmSortByLikes(Long directorId);
 }

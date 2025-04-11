@@ -6,10 +6,7 @@ import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.FullFilm;
 import ru.yandex.practicum.filmorate.dto.Genre;
 import ru.yandex.practicum.filmorate.dto.Mpa;
-import ru.yandex.practicum.filmorate.exeption.DateIsToOldException;
-import ru.yandex.practicum.filmorate.exeption.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
-import ru.yandex.practicum.filmorate.exeption.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exeption.*;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -212,4 +209,20 @@ public class FilmService {
     }
 
 
+    public List<FilmDto> getFilmsByDirectorId(Long directorId, String sortBy) {
+        if (!directorService.existDirector(directorId)){
+            throw new DirectorNotExistException("Директор с id " + directorId + " не найден");
+        }
+        if (sortBy.equals("year")){
+            return filmStorage.getDirectorFilmSortByYear(directorId).stream()
+                    .map(FilmService::mapToFilDto)
+                    .collect(Collectors.toList());
+        } else if (sortBy.equals("likes")) {
+            return filmStorage.getDirectorFilmSortByLikes(directorId).stream()
+                    .map(FilmService::mapToFilDto)
+                    .collect(Collectors.toList());
+        }else {
+            throw new SortByNotCorrectException("Выберите сортировку или по году или по количеству лайков year,likes()");
+        }
+    }
 }

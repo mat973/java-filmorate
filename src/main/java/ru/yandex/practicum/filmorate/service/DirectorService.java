@@ -53,4 +53,8 @@ public class DirectorService {
     public List<Director> getDirectorsByFilmId(Long filmId) {
         return directorDbStorage.getDirectorsByFilmId(filmId);
     }
+
+    public Boolean existDirector(Long directorId){
+        return directorDbStorage.existDirector(directorId);
+    }
 }
