@@ -34,9 +34,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     public FilmDto updateFilm(@Valid @RequestBody FilmDto filmDto) {
         log.debug("Начало обработки запроса на обновление фильма: {}", filmDto);
-
         return filmService.updateFilm(filmDto);
-
     }
 
     @GetMapping()
@@ -82,7 +80,8 @@ public class FilmController {
     }
 
     @GetMapping("/director/{directorId}")
-    public List<FilmDto> getFimByDirectorId(@PathVariable Long directorId, @RequestParam String sortBy){
+    public List<FilmDto> getFimByDirectorId(@PathVariable Long directorId, @RequestParam String sortBy) {
+        log.info("Запрос на получение фильмов режисера с id {} тсартированных по {}", directorId, sortBy);
         return filmService.getFilmsByDirectorId(directorId, sortBy);
     }
 

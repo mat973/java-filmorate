@@ -5,7 +5,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exeption.FilmNotUpdateException;
 import ru.yandex.practicum.filmorate.exeption.GenreNotExistException;
 import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
@@ -85,11 +84,13 @@ public class FilmDbStorage implements FilmStorage {
                         f.release_date,\s
                         f.duration,\s
                         f.rating_id,
-                        STRING_AGG(fg.genre_id, ',') AS genres
+                        STRING_AGG(fg.genre_id, ',') AS genres,
+                        STRING_AGG(df.DIRECTOR_ID, ',') AS directors
                     FROM films f
                     JOIN ratings r ON f.rating_id = r.rating_id
                     JOIN film_genre fg ON f.film_id = fg.film_id
                     LEFT JOIN film_likes fl ON fl.film_id = f.film_id
+                    LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
                     GROUP BY f.film_id
                     ORDER BY\s
                         COUNT(fl.user_id) DESC,\s
@@ -249,7 +250,7 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() != null) {
             film.getGenres().forEach(x -> jdbc.update(INSERT_FILM_GENRE_QUERY, filmId, x));
         }
-        if (film.getDirectors() != null){
+        if (film.getDirectors() != null) {
             film.getDirectors().forEach(x -> jdbc.update(INSERT_FILM_DIRECTOR, filmId, x));
         }
 
@@ -276,7 +277,7 @@ public class FilmDbStorage implements FilmStorage {
                     jdbc.update(INSERT_FILM_GENRE_QUERY, film.getId(), genre));
         }
         jdbc.update(DELETE_DIRECTOR_QUERY, film.getId());
-        if (film.getDirectors() != null){
+        if (film.getDirectors() != null) {
             film.getDirectors().forEach(x -> jdbc.update(INSERT_FILM_DIRECTOR, film.getId(), x));
         }
         return film;

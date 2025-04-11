@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exeption.DirectorMustHaveNameException;
 import ru.yandex.practicum.filmorate.exeption.DirectorNotExistException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -27,7 +26,7 @@ public class DirectorService {
     }
 
     public Director saveDirector(Director director) {
-        if (director.getName() == null){
+        if (director.getName() == null) {
             throw new DirectorMustHaveNameException("У директора должно быть имя");
         }
         return directorDbStorage.saveDirector(director);
@@ -40,11 +39,11 @@ public class DirectorService {
         directorDbStorage.deleteDirector(directorId);
     }
 
-    public Director updateDirector(Director director){
+    public Director updateDirector(Director director) {
         if (director.getId() == null || !directorDbStorage.existDirector(director.getId())) {
             throw new DirectorNotExistException("Директора с id " + director.getId() + " не существует.");
         }
-        if (director.getName() == null){
+        if (director.getName() == null) {
             throw new DirectorMustHaveNameException("У директора должно быть имя");
         }
         return directorDbStorage.updateDirector(director);
@@ -54,7 +53,7 @@ public class DirectorService {
         return directorDbStorage.getDirectorsByFilmId(filmId);
     }
 
-    public Boolean existDirector(Long directorId){
+    public Boolean existDirector(Long directorId) {
         return directorDbStorage.existDirector(directorId);
     }
 }

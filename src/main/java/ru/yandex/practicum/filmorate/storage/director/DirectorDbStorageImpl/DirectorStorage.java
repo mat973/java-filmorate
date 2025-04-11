@@ -25,12 +25,13 @@ public class DirectorStorage implements DirectorDbStorage {
     private static final String GET_DIRECTOR_BY_ID = "SELECT * FROM director WHERE director_id = ?";
     private static final String UPDATE_QUERY = "UPDATE director SET name = ? where director_id = ?";
     private static final String DELETE_QUERY = "DELETE FROM director WHERE ?";
-    private static final String GET_DIRECTOR_BY_FILM_ID_QUERY  = """
-            SELECT d.DIRECTOR_ID , d.NAME
-            from DIRECTOR d
-            join DIRECTOR_FILM df  on d.director_id = df.director_id
-            where df.film_id = ?
-    """;
+    private static final String GET_DIRECTOR_BY_FILM_ID_QUERY = """
+                    SELECT d.DIRECTOR_ID , d.NAME
+                    from DIRECTOR d
+                    join DIRECTOR_FILM df  on d.director_id = df.director_id
+                    where df.film_id = ?
+            """;
+
     @Override
     public List<Director> getDirectors() {
         return jdbc.query(FIND_ALL_QUERY, rowMapper);
@@ -72,6 +73,6 @@ public class DirectorStorage implements DirectorDbStorage {
 
     @Override
     public List<Director> getDirectorsByFilmId(Long filmId) {
-        return jdbc.query(GET_DIRECTOR_BY_FILM_ID_QUERY,rowMapper, filmId);
+        return jdbc.query(GET_DIRECTOR_BY_FILM_ID_QUERY, rowMapper, filmId);
     }
 }

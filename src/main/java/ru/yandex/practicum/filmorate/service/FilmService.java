@@ -114,8 +114,8 @@ public class FilmService {
         }
 
 
-        List<Director> directors= Collections.emptyList();
-        if (filmDto.getDirectors() != null && !filmDto.getDirectors().isEmpty() ) {
+        List<Director> directors = Collections.emptyList();
+        if (filmDto.getDirectors() != null && !filmDto.getDirectors().isEmpty()) {
             directors = directorService.getDirectorsByFilmId(filmId);
         }
 
@@ -162,7 +162,7 @@ public class FilmService {
             genres = filmDto.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()).stream().toList();
         }
         List<Long> directors;
-        if (filmDto.getDescription() == null || filmDto.getDirectors().isEmpty()) {
+        if (filmDto.getDirectors() == null || filmDto.getDirectors().isEmpty()) {
             directors = null;
         } else {
             directors = filmDto.getDirectors().stream().map(Director::getId).collect(Collectors.toSet()).stream().toList();
@@ -210,10 +210,10 @@ public class FilmService {
 
 
     public List<FilmDto> getFilmsByDirectorId(Long directorId, String sortBy) {
-        if (!directorService.existDirector(directorId)){
+        if (!directorService.existDirector(directorId)) {
             throw new DirectorNotExistException("Директор с id " + directorId + " не найден");
         }
-        if (sortBy.equals("year")){
+        if (sortBy.equals("year")) {
             return filmStorage.getDirectorFilmSortByYear(directorId).stream()
                     .map(FilmService::mapToFilDto)
                     .collect(Collectors.toList());
@@ -221,7 +221,7 @@ public class FilmService {
             return filmStorage.getDirectorFilmSortByLikes(directorId).stream()
                     .map(FilmService::mapToFilDto)
                     .collect(Collectors.toList());
-        }else {
+        } else {
             throw new SortByNotCorrectException("Выберите сортировку или по году или по количеству лайков year,likes()");
         }
     }
