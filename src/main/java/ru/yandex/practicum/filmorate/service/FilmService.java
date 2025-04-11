@@ -196,7 +196,6 @@ public class FilmService {
     }
 
 
-
     public List<FilmDto> getFilmsByDirectorId(Long directorId, String sortBy) {
         if (!directorService.existDirector(directorId)) {
             throw new DirectorNotExistException("Директор с id " + directorId + " не найден");
@@ -213,7 +212,6 @@ public class FilmService {
             throw new SortByNotCorrectException("Выберите сортировку или по году или по количеству лайков year,likes()");
         }
     }
-}
 
     public List<FilmDto> getPopularFilms(Integer count, Integer genreId, Integer year) {
         return filmStorage.getPopularFilms(count, genreId, year).stream()
@@ -221,4 +219,7 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 }
+
+
+
 
