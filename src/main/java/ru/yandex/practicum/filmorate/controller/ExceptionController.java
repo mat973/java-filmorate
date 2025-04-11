@@ -132,6 +132,9 @@ public class ExceptionController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionDto handleSortByNotCorrectException(final SortByNotCorrectException e) {
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto handleException(final IllegalArgumentException e) {
         return new ExceptionDto(e.getMessage());
     }
 }

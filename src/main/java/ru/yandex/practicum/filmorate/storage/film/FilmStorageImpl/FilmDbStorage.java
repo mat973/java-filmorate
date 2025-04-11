@@ -23,21 +23,20 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbc;
     private final FilmRowMapper filmRowMapper;
 
-
     private static final String FIND_BY_ID_QUERY =
             "SELECT * FROM films f WHERE f.film_id = ?";
     private static final String FIND_BY_ID_GENRE_QUERY =
             "SELECT genre_id FROM  film_genre where film_id = ?";
-
     private static final String INSERT_QUERY =
             "INSERT INTO films (title, description, release_date, duration, rating_id) " +
                     "VALUES (?, ?, ?, ?, ?)";
-
     private static final String INSERT_FILM_GENRE_QUERY =
             "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
 
+
     private static final String INSERT_FILM_DIRECTOR =
             "INSERT INTO director_film (film_id, director_id) VALUES (?, ?)";
+
 
     private static final String UPDATE_QUERY =
             "UPDATE films SET title = ?, description = ?, release_date = ?, duration = ?, rating_id = ? WHERE film_id = ?";
@@ -71,31 +70,34 @@ public class FilmDbStorage implements FilmStorage {
             LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
             WHERE f.FILM_ID = ?
             """;
-
     private static final String SET_LIKE_QUERY = "INSERT INTO FILM_LIKES (USER_ID, FILM_ID) VALUES (?,?)";
-
     private static final String SET_DISLIKE_QUERY = "DELETE FROM FILM_LIKES WHERE user_id = ? AND FILM_ID = ?";
-    private static final String GET_POPULAR_FILMS_QUERY =
-            """
-                    SELECT
-                        f.film_id,\s
-                        f.title,\s
-                        f.description,\s
-                        f.release_date,\s
-                        f.duration,\s
-                        f.rating_id,
-                        STRING_AGG(fg.genre_id, ',') AS genres,
-                        STRING_AGG(df.DIRECTOR_ID, ',') AS directors
-                    FROM films f
-                    JOIN ratings r ON f.rating_id = r.rating_id
-                    JOIN film_genre fg ON f.film_id = fg.film_id
-                    LEFT JOIN film_likes fl ON fl.film_id = f.film_id
-                    LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
-                    GROUP BY f.film_id
-                    ORDER BY\s
-                        COUNT(fl.user_id) DESC,\s
-                        f.film_id ASC
-                    LIMIT ?""";
+
+    private static final String GET_POPULAR_FILMS_QUERY = """
+            SELECT
+                f.film_id,
+                f.title,
+                f.description,
+                f.release_date,
+                f.duration,
+                f.rating_id,
+                STRING_AGG(fg.genre_id, ',') AS genres,
+                STRING_AGG(df.DIRECTOR_ID, ',') AS directors
+            FROM films f
+            JOIN ratings r ON f.rating_id = r.rating_id
+            JOIN film_genre fg ON f.film_id = fg.film_id
+            LEFT JOIN film_likes fl ON fl.film_id = f.film_id
+            LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
+            WHERE
+                (fg.genre_id = ? OR ? IS NULL)  -- Условие для фильтрации по жанру
+                AND (EXTRACT(YEAR FROM f.release_date) = ? OR ? IS NULL)  -- Условие для фильтрации по году
+            GROUP BY f.film_id
+            ORDER BY
+                COUNT(fl.user_id) DESC,
+                f.film_id ASC
+            LIMIT ?
+    """;
+
     private static final String EXIST_BY_ID_QUERY = "SELECT COUNT(*) > 0 FROM films WHERE film_id = ?";
     private static final String EXIST_MPA_BY_ID_QUERY = "SELECT COUNT(*) FROM ratings WHERE rating_id = ?";
     private static final String EXIST_GENRE_BY_ID_QUERY = "SELECT COUNT(*)  FROM genre where genre_id = ?";
@@ -121,7 +123,6 @@ public class FilmDbStorage implements FilmStorage {
             WHERE f.film_id = ?
             GROUP BY f.film_id, r.rating_id
             """;
-
     private static final String GET_RECOMMENDATION_QUERY = """
             SELECT\s
               f.film_id,\s
@@ -308,15 +309,14 @@ public class FilmDbStorage implements FilmStorage {
         jdbc.update(SET_DISLIKE_QUERY, userId, filmId);
     }
 
-
     @Override
     public Boolean existById(Long id) {
         return jdbc.queryForObject(EXIST_BY_ID_QUERY, Boolean.class, id);
     }
 
     @Override
-    public List<Film> getPopularFilms(Integer count) {
-        return jdbc.query(GET_POPULAR_FILMS_QUERY, filmRowMapper, count);
+    public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
+        return jdbc.query(GET_POPULAR_FILMS_QUERY, filmRowMapper, genreId, genreId, year, year, count);
     }
 
     public List<Film> getRecommendations(Long userId) {

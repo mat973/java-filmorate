@@ -13,7 +13,7 @@ public interface FilmStorage {
 
     Optional<Film> find(Long filmId);
 
-    List<Film> getPopularFilms(Integer count);
+    List<Film> getPopularFilms(Integer count, Integer genreId, Integer year);
 
     Boolean existById(Long filmId);
 
@@ -25,7 +25,11 @@ public interface FilmStorage {
 
     List<Film> getRecommendations(Long userId);
 
+
     List<Film> getDirectorFilmSortByYear(Long directorId);
 
     List<Film> getDirectorFilmSortByLikes(Long directorId);
 }
+
+}
+

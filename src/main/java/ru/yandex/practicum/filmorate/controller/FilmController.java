@@ -12,12 +12,12 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/films")
 public class FilmController {
     private final Logger log = LoggerFactory.getLogger(FilmController.class);
+
     @Autowired
     private FilmService filmService;
 
@@ -67,23 +67,17 @@ public class FilmController {
 
     @GetMapping("/popular")
     @ResponseStatus(HttpStatus.OK)
-    public List<FilmDto> getPopularFilms(@RequestParam Optional<Integer> count) {
-        log.info("Запрос на получение популярных фильмов.");
-        Integer countt;
-        if (count.isEmpty()) {
-            countt = 10;
-        } else {
-            countt = count.get();
-        }
-        return filmService.getPopularFilms(countt);
-
+    public List<FilmDto> getPopularFilmsByGenreOfYear(
+            @RequestParam(defaultValue = "10") Integer count,
+            @RequestParam(required = false) Integer genreId,
+            @RequestParam(required = false) Integer year) {
+        log.info("Запрос на получение популярных фильмов с количеством {}, жанром {} и годом {}", count, genreId, year);
+        return filmService.getPopularFilms(count, genreId, year);
     }
-
-    @GetMapping("/director/{directorId}")
+  
+      @GetMapping("/director/{directorId}")
     public List<FilmDto> getFimByDirectorId(@PathVariable Long directorId, @RequestParam String sortBy) {
         log.info("Запрос на получение фильмов режисера с id {} тсартированных по {}", directorId, sortBy);
         return filmService.getFilmsByDirectorId(directorId, sortBy);
     }
-
-
 }

@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,6 @@ public class FilmService {
 
     private final LocalDate checkDate = LocalDate.of(1895, 12, 28);
     private static final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
 
     public FilmDto createFilm(FilmDto filmDto) {
         Film film = filmStorage.save(mapToFilm(filmDto));
@@ -48,7 +46,6 @@ public class FilmService {
 
         return mapToFilDto(filmStorage.update(newFilm));
     }
-
 
     public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
@@ -80,13 +77,6 @@ public class FilmService {
         }
 
         filmStorage.dislike(filmId, userId);
-    }
-
-    public List<FilmDto> getPopularFilms(Integer count) {
-
-        return filmStorage.getPopularFilms(count).stream()
-                .map(FilmService::mapToFilDto)
-                .collect(Collectors.toList());
     }
 
     public FullFilm getFilmWithGenre(Long filmId) {
@@ -144,7 +134,6 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-
     private Film mapToFilm(FilmDto filmDto) {
         LocalDate date = LocalDate.parse(filmDto.getReleaseDate(), formater);
         if (date.isBefore(checkDate)) {
@@ -168,7 +157,6 @@ public class FilmService {
             directors = filmDto.getDirectors().stream().map(Director::getId).collect(Collectors.toSet()).stream().toList();
         }
 
-
         return Film.builder()
                 .id(filmDto.getId())
                 .description(filmDto.getDescription())
@@ -180,7 +168,6 @@ public class FilmService {
                 .directors(directors)
                 .build();
     }
-
 
     private static FilmDto mapToFilDto(Film film) {
         List<Genre> genres;
@@ -209,6 +196,7 @@ public class FilmService {
     }
 
 
+
     public List<FilmDto> getFilmsByDirectorId(Long directorId, String sortBy) {
         if (!directorService.existDirector(directorId)) {
             throw new DirectorNotExistException("Директор с id " + directorId + " не найден");
@@ -226,3 +214,11 @@ public class FilmService {
         }
     }
 }
+
+    public List<FilmDto> getPopularFilms(Integer count, Integer genreId, Integer year) {
+        return filmStorage.getPopularFilms(count, genreId, year).stream()
+                .map(FilmService::mapToFilDto)
+                .collect(Collectors.toList());
+    }
+}
+
