@@ -40,7 +40,7 @@ public class DirectorController {
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public Director updateDirector(Director director){
+    public Director updateDirector(@RequestBody Director director){
         return directorService.updateDirector(director);
     }
 }

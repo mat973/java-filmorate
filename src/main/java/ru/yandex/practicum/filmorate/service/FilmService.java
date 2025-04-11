@@ -18,11 +18,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -117,7 +113,13 @@ public class FilmService {
                     .map(x -> genreMap.get(x.getId()))
                     .filter(Objects::nonNull)
                     .toList();
-            List<Director> directors = directorService.getDirectorsByFilmId(filmId);
+
+        }
+
+
+        List<Director> directors= Collections.emptyList();
+        if (filmDto.getDirectors() != null && !filmDto.getDirectors().isEmpty() ) {
+            directors = directorService.getDirectorsByFilmId(filmId);
         }
 
         return FullFilm.builder()
@@ -128,6 +130,7 @@ public class FilmService {
                 .mpa(mpa)
                 .releaseDate(filmDto.getReleaseDate())
                 .genres(genres)
+                .directors(directors)
                 .build();
     }
 
@@ -155,15 +158,17 @@ public class FilmService {
         if (filmDto.getMpa() == null) {
             throw new MpaNotExistException("Рейтинг не может быть путсым");
         }
-        if (filmDto.getGenres() == null) {
-            return Film.builder()
-                    .id(filmDto.getId())
-                    .description(filmDto.getDescription())
-                    .duration(duration)
-                    .title(filmDto.getName())
-                    .releaseDate(date)
-                    .mpa(filmDto.getMpa().getId())
-                    .build();
+        List<Integer> genres;
+        if (filmDto.getGenres() == null || filmDto.getGenres().isEmpty()) {
+            genres = null;
+        } else {
+            genres = filmDto.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()).stream().toList();
+        }
+        List<Long> directors;
+        if (filmDto.getDescription() == null || filmDto.getDirectors().isEmpty()) {
+            directors = null;
+        } else {
+            directors = filmDto.getDirectors().stream().map(Director::getId).collect(Collectors.toSet()).stream().toList();
         }
 
 
@@ -174,22 +179,24 @@ public class FilmService {
                 .title(filmDto.getName())
                 .releaseDate(date)
                 .mpa(filmDto.getMpa().getId())
-                .genres(filmDto.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()).stream().toList())
+                .genres(genres)
+                .directors(directors)
                 .build();
     }
 
 
     private static FilmDto mapToFilDto(Film film) {
-
-        if (film.getGenres() == null) {
-            return FilmDto.builder()
-                    .id(film.getId())
-                    .description(film.getDescription())
-                    .name(film.getTitle())
-                    .releaseDate(film.getReleaseDate().format(formater))
-                    .duration(film.getDuration().getSeconds() / 60)
-                    .mpa(new Mpa(film.getMpa()))
-                    .build();
+        List<Genre> genres;
+        if (film.getGenres() == null || film.getGenres().isEmpty()) {
+            genres = Collections.emptyList();
+        } else {
+            genres = film.getGenres().stream().map(Genre::new).collect(Collectors.toList());
+        }
+        List<Director> directors;
+        if (film.getDirectors() == null || film.getDirectors().isEmpty()) {
+            directors = Collections.emptyList();
+        } else {
+            directors = film.getDirectors().stream().map(Director::new).collect(Collectors.toList());
         }
 
         return FilmDto.builder()
@@ -199,7 +206,8 @@ public class FilmService {
                 .releaseDate(film.getReleaseDate().format(formater))
                 .duration(film.getDuration().getSeconds() / 60)
                 .mpa(new Mpa(film.getMpa()))
-                .genres(film.getGenres().stream().map(Genre::new).collect(Collectors.toList()))
+                .genres(genres)
+                .directors(directors)
                 .build();
     }
 
