@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
@@ -218,8 +219,31 @@ public class FilmService {
                 .map(FilmService::mapToFilDto)
                 .collect(Collectors.toList());
     }
+
+    public List<FilmDto> getFilmsByNameOrDirector(String query, List<String> by) {
+        log.debug("Получение фильмов по запросу: {}, по полям: {}", query, by);
+        if (query == null || by == null ||by.size() > 2) {
+            throw new IllegalArgumentException("Некорректные параметры поиска!");
+        }
+        if (by.size() == 1) {
+            if (by.contains("title")) {
+                return filmStorage.getFilmsByName(query)
+                        .stream()
+                        .map(FilmService::mapToFilDto)
+                        .collect(Collectors.toList());
+            } else if (by.contains("director")) {
+                return filmStorage.getFilmsByDirector(query)
+                        .stream()
+                        .map(FilmService::mapToFilDto)
+                        .collect(Collectors.toList());
+            } else {
+                throw new IllegalArgumentException("Некорректные параметры поиска!");
+            }
+        } else {
+            return filmStorage.getFilmsByNameAndDirector(query)
+                    .stream()
+                    .map(FilmService::mapToFilDto)
+                    .collect(Collectors.toList());
+        }
+    }
 }
-
-
-
-

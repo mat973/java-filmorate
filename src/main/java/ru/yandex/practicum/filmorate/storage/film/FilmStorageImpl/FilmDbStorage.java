@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film.FilmStorageImpl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -17,6 +18,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Component("film-bd")
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
@@ -32,8 +34,6 @@ public class FilmDbStorage implements FilmStorage {
                     "VALUES (?, ?, ?, ?, ?)";
     private static final String INSERT_FILM_GENRE_QUERY =
             "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
-
-
     private static final String INSERT_FILM_DIRECTOR =
             "INSERT INTO director_film (film_id, director_id) VALUES (?, ?)";
 
@@ -226,6 +226,39 @@ public class FilmDbStorage implements FilmStorage {
             ORDER BY\s
               COUNT(fl.user_id) DESC
             """;
+    private static final String GET_FILM_BY_NAME_LIKE_QUERY = """
+            SELECT
+            f.film_id,
+            f.title,
+            f.description,
+            f.release_date,
+            f.duration,
+            f.directors,
+            f.RATING_ID AS rating_id,
+            STRING_AGG(fg.genre_id, ',') AS genres
+            FROM films f
+            JOIN ratings r ON f.rating_id = r.rating_id
+            JOIN film_genre fg ON f.film_id = fg.film_id
+            WHERE f.title LIKE ?
+            GROUP BY f.film_id
+            """;
+    private static final String GET_FILM_BY_DIRECTOR_LIKE_QUERY = """
+            SELECT
+            f.film_id,
+            f.title,
+            f.description,
+            f.release_date,
+            f.duration,
+            f.directors,
+            f.RATING_ID AS rating_id,
+            STRING_AGG(fg.genre_id, ',') AS genres
+            FROM films f
+            JOIN ratings r ON f.rating_id = r.rating_id
+            JOIN film_genre fg ON f.film_id = fg.film_id
+            WHERE f.directors LIKE ?
+            GROUP BY f.film_id
+            """;
+    private static final String GET_FILM_BY_NAME_OR_DIRECTOR_QUERY = "SELECT * FROM films WHERE title = ? OR directors = ?";
 
     @Override
     public Film save(Film film) {
@@ -297,6 +330,21 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getAllFilms() {
         return jdbc.query(GET_ALL_FILMS_QUERY, filmRowMapper);
+    }
+
+    @Override
+    public List<Film> getFilmsByName(String query) {
+        return jdbc.query(GET_FILM_BY_NAME_LIKE_QUERY, filmRowMapper, "%" + query + "%");
+    }
+
+    @Override
+    public List<Film> getFilmsByDirector(String query) {
+        return jdbc.query(GET_FILM_BY_DIRECTOR_LIKE_QUERY, filmRowMapper, "%" + query + "%");
+    }
+
+    @Override
+    public List<Film> getFilmsByNameAndDirector(String query) {
+        return List.of();
     }
 
     @Override

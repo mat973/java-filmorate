@@ -30,10 +30,9 @@ create table IF NOT EXISTS  films (
     description text,
     release_date DATE NOT NULL,
     duration INT NOT NULL,
-    rating_id SMALLINT REFERENCES ratings (rating_id)
+    rating_id SMALLINT REFERENCES ratings (rating_id),
+    directors varchar(100)
 );
-
-
 
 -- Таблица лайков фильмов
 create table IF NOT EXISTS film_likes (
