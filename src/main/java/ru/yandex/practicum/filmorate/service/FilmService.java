@@ -224,7 +224,7 @@ public class FilmService {
     }
 
     public List<FilmDto> getFilmsByNameOrDirector(String query, List<String> by) {
-        if (query == null || by == null ||by.size() > 2) {
+        if (query == null || by == null || by.size() > 2) {
             throw new IllegalArgumentException("Некорректные параметры поиска!");
         }
         if (by.size() == 1) {
