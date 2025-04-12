@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exeption.DirectorMustHaveNameException;
-import ru.yandex.practicum.filmorate.exeption.DirectorNotExistException;
+import ru.yandex.practicum.filmorate.exception.DirectorMustHaveNameException;
+import ru.yandex.practicum.filmorate.exception.DirectorNotExistException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 

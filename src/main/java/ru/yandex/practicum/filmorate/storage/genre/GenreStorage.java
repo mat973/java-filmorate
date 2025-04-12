@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.Genre;
-import ru.yandex.practicum.filmorate.exeption.GenreNotExistException;
+import ru.yandex.practicum.filmorate.exception.GenreNotExistException;
 
 import java.util.Collections;
 import java.util.List;

@@ -19,22 +19,21 @@ public class DirectorController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Director> getDirectors() {
-        log.info("Запрос на получние списка всех режисеров");
+        log.info("Запрос на получение списка всех режиссеров");
         return directorService.getDirectors();
     }
 
     @GetMapping("/{directorId}")
     @ResponseStatus(HttpStatus.OK)
     public Director getDirectorById(@PathVariable Long directorId) {
-        log.info("Запрос на получение режисера с id {}", directorId);
+        log.info("Запрос на получение режиссера с id {}", directorId);
         return directorService.getDirectorById(directorId);
     }
-
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public Director saveDirector(@RequestBody Director director) {
-        log.info("Запрос на создание нового ржисера с имнем {}", director.getName());
+        log.info("Запрос на создание нового режиссера с именем {}", director.getName());
         return directorService.saveDirector(director);
     }
 
@@ -48,8 +47,7 @@ public class DirectorController {
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public Director updateDirector(@RequestBody Director director) {
-        log.info("Запрос на обналвение директора с id {}", director.getName());
+        log.info("Запрос на обновление директора с id {}", director.getName());
         return directorService.updateDirector(director);
     }
 }
-

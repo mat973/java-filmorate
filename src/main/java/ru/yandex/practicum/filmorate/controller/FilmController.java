@@ -52,7 +52,10 @@ public class FilmController {
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<FilmDto> getFilmsByNameOrDirector(@RequestParam(required = false) String query, @RequestParam List<String> by) {
+    public List<FilmDto> getFilmsByNameOrDirector(
+            @RequestParam(required = false) String query,
+            @RequestParam List<String> by
+    ) {
         log.debug("Запрос на поиск фильмов с параметрами: {}, {}", query, by);
         List<FilmDto> films = filmService.getFilmsByNameOrDirector(query, by);
         log.info("Вернули список фильмов: {}", films);
@@ -85,7 +88,7 @@ public class FilmController {
 
     @GetMapping("/director/{directorId}")
     public List<FilmDto> getFimByDirectorId(@PathVariable Long directorId, @RequestParam String sortBy) {
-        log.info("Запрос на получение фильмов режисера с id {} тсартированных по {}", directorId, sortBy);
+        log.info("Запрос на получение фильмов режиссера с id {} отсортированных по {}", directorId, sortBy);
         return filmService.getFilmsByDirectorId(directorId, sortBy);
     }
 }

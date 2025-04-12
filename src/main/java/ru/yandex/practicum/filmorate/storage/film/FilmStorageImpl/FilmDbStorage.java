@@ -6,9 +6,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exeption.FilmNotUpdateException;
-import ru.yandex.practicum.filmorate.exeption.GenreNotExistException;
-import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
+import ru.yandex.practicum.filmorate.exception.FilmNotUpdateException;
+import ru.yandex.practicum.filmorate.exception.GenreNotExistException;
+import ru.yandex.practicum.filmorate.exception.MpaNotExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
@@ -176,7 +176,6 @@ public class FilmDbStorage implements FilmStorage {
               COUNT(fl.user_id) DESC,\s
               f.film_id ASC
             """;
-
     private static final String GET_DIRECTORS_FILM_SORT_BY_YEAR = """
             SELECT\s
               f.film_id,\s
@@ -228,37 +227,64 @@ public class FilmDbStorage implements FilmStorage {
             """;
     private static final String GET_FILM_BY_NAME_LIKE_QUERY = """
             SELECT
-            f.film_id,
-            f.title,
-            f.description,
-            f.release_date,
-            f.duration,
-            f.directors,
-            f.RATING_ID AS rating_id,
-            STRING_AGG(fg.genre_id, ',') AS genres
-            FROM films f
-            JOIN ratings r ON f.rating_id = r.rating_id
-            JOIN film_genre fg ON f.film_id = fg.film_id
-            WHERE f.title LIKE ?
-            GROUP BY f.film_id
+              f.film_id,
+              f.title,
+              f.description,
+              f.release_date,
+              f.duration,
+              f.rating_id,
+              STRING_AGG(fg.genre_id, ',') AS genres,
+              STRING_AGG(df.DIRECTOR_ID, ',') AS directors
+            FROM
+              films f
+              LEFT JOIN director_film df ON f.film_id = df.film_id
+              LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+              LEFT JOIN film_likes fl ON f.film_id = fl.film_id
+            WHERE
+            f.title LIKE ?
+            GROUP BY
+            f.film_id
             """;
     private static final String GET_FILM_BY_DIRECTOR_LIKE_QUERY = """
             SELECT
-            f.film_id,
-            f.title,
-            f.description,
-            f.release_date,
-            f.duration,
-            f.directors,
-            f.RATING_ID AS rating_id,
-            STRING_AGG(fg.genre_id, ',') AS genres
-            FROM films f
-            JOIN ratings r ON f.rating_id = r.rating_id
-            JOIN film_genre fg ON f.film_id = fg.film_id
-            WHERE f.directors LIKE ?
-            GROUP BY f.film_id
+              f.film_id,
+              f.title,
+              f.description,
+              f.release_date,
+              f.duration,
+              f.rating_id,
+              GROUP_CONCAT(DISTINCT fg.genre_id) AS genres,
+              GROUP_CONCAT(DISTINCT df.director_id) AS directors
+            FROM
+              films f
+              LEFT JOIN director_film df ON f.film_id = df.film_id
+              LEFT JOIN director d ON df.director_id = d.director_id
+              LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+              LEFT JOIN film_likes fl ON f.film_id = fl.film_id
+            WHERE
+            d.name LIKE ?
             """;
-    private static final String GET_FILM_BY_NAME_OR_DIRECTOR_QUERY = "SELECT * FROM films WHERE title = ? OR directors = ?";
+    private static final String GET_FILM_BY_NAME_OR_DIRECTOR_QUERY = """
+            SELECT
+              f.film_id,
+              f.title,
+              f.description,
+              f.release_date,
+              f.duration,
+              f.rating_id,
+              STRING_AGG(fg.genre_id, ',') AS genres,
+              STRING_AGG(df.DIRECTOR_ID, ',') AS directors
+            FROM
+              films f
+              LEFT JOIN director_film df ON f.film_id = df.film_id
+              LEFT JOIN director d ON df.director_id = d.director_id
+              LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+              LEFT JOIN film_likes fl ON f.film_id = fl.film_id
+            WHERE
+            f.title LIKE ? OR d.name LIKE ?
+            GROUP BY
+            f.film_id
+            """;
 
     @Override
     public Film save(Film film) {
@@ -344,7 +370,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilmsByNameAndDirector(String query) {
-        return List.of();
+        return jdbc.query(GET_FILM_BY_NAME_OR_DIRECTOR_QUERY, filmRowMapper, "%" + query + "%", "%" + query + "%");
     }
 
     @Override
