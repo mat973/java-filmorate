@@ -109,6 +109,8 @@ public class ReviewDbStorage implements ReviewStorage {
 
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM review WHERE review_id = ?";
 
+    private static final String GET_USER_ID_FROM_REVIEW_QUERY = "Select user_id from review WHERE review_id = ?";
+
     @Override
     public Review create(Review review) {
 
@@ -178,6 +180,11 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public void deleteDislikeFromReview(Long reviewId, Long userId) {
         jdbc.update(DELETE_DISLIKE_QUERY, reviewId, userId);
+    }
+
+    @Override
+    public Long getUserIdFromReview(Long reviewId) {
+        return jdbc.queryForObject(GET_USER_ID_FROM_REVIEW_QUERY, Long.class, reviewId);
     }
 
 

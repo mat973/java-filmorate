@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,18 +9,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.FullFilm;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
     private final Logger log = LoggerFactory.getLogger(FilmController.class);
 
-    @Autowired
-    private FilmService filmService;
+    private final FilmService filmService;
+    private final UserService userService;
 
     @PostMapping()
     @ResponseStatus(HttpStatus.OK)
@@ -56,6 +61,7 @@ public class FilmController {
     public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
         log.info("Запрос на добавление лйка фильму с filmId {} от пользоватля с userId {}", filmId, userId);
         filmService.addLike(filmId, userId);
+        userService.createEvent(userId, EventType.LIKE, Operation.ADD, filmId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
@@ -63,6 +69,7 @@ public class FilmController {
     public void deleteLike(@PathVariable Long filmId, @PathVariable Long userId) {
         log.info("Запрос на удаление лйка фильму с filmId {} от пользоватля с userId {}", filmId, userId);
         filmService.deleteLike(filmId, userId);
+        userService.createEvent(userId, EventType.LIKE, Operation.REMOVE, filmId);
     }
 
     @GetMapping("/popular")

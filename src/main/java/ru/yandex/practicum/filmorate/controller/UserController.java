@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -56,6 +59,7 @@ public class UserController {
         log.info("Выполнение запроса по добавлению в друзья от пользователям userId {}, польщователю friend userId {}",
                 userId, friendId);
         userService.addFriendById(userId, friendId);
+        userService.createEvent(userId, EventType.FRIEND, Operation.ADD, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
@@ -64,6 +68,7 @@ public class UserController {
         log.info("Выполнение запроса по удалению из друзей от пользователям userId {}, польщователю friend userId {}",
                 userId, friendId);
         userService.deleteFriendById(userId, friendId);
+        userService.createEvent(userId, EventType.FRIEND, Operation.REMOVE, friendId);
     }
 
     @GetMapping("/{userId}/friends")
@@ -88,5 +93,11 @@ public class UserController {
         return filmService.getRecommendation(userId);
     }
 
+
+    @GetMapping("/{userId}/feed")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Event> getUserEvents(@PathVariable Long userId){
+        return userService.getUserEvents(userId);
+    }
 
 }
