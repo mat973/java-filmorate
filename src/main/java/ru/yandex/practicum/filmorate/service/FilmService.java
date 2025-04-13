@@ -70,6 +70,22 @@ public class FilmService {
         filmStorage.addLike(filmId, userId);
     }
 
+    public List<FilmDto> getCommonFilms(Long userId, Long friendId) {
+        if (!userService.contain(userId) || !userService.contain(friendId)) {
+            throw new UserNotFoundException("Пользователь с одним из идентификаторов не найден");
+        }
+
+        List<Film> userFilms = filmStorage.getFilmsByUserId(userId);
+        List<Film> friendFilms = filmStorage.getFilmsByUserId(friendId);
+
+        Set<Film> commonFilms = new HashSet<>(userFilms);
+        commonFilms.retainAll(friendFilms);
+
+        return commonFilms.stream()
+                .map(FilmService::mapToFilDto)
+                .collect(Collectors.toList());
+    }
+
     public void deleteLike(Long filmId, Long userId) {
         if (userId == null || !userService.contain(userId)) {
             throw new UserNotFoundException("Пользователя не может быть с пустым filmId");
@@ -251,7 +267,9 @@ public class FilmService {
         }
     }
 
+
     public void deleteFilmById(Long filmId) {
         filmStorage.deleteFilmById(filmId);
     }
 }
+

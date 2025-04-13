@@ -30,10 +30,12 @@ public interface FilmStorage {
 
     List<Film> getRecommendations(Long userId);
 
-
     List<Film> getDirectorFilmSortByYear(Long directorId);
 
     List<Film> getDirectorFilmSortByLikes(Long directorId);
 
+    List<Film> getFilmsByUserId(Long userId);
+
     void deleteFilmById(Long filmId);
 }
+
