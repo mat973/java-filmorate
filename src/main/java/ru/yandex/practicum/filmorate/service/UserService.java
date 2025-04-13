@@ -145,7 +145,7 @@ public class UserService {
             throw new DateNotExistException("Дата рождения не может быть позже текущей даты.");
         }
 
-        if (userDto.getName() == null) {
+        if (userDto.getName() == null || userDto.getName().isEmpty() || userDto.getName().isBlank()) {
             log.info("Имя пользователя не указано, используется логин: {}", userDto.getLogin());
             userDto.setName(userDto.getLogin());
         }
