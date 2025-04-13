@@ -93,7 +93,6 @@ public class UserController {
         return filmService.getRecommendation(userId);
     }
 
-
     @GetMapping("/{userId}/feed")
     @ResponseStatus(HttpStatus.OK)
     public List<Event> getUserEvents(@PathVariable Long userId){

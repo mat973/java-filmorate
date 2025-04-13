@@ -40,7 +40,6 @@ public class ReviewService {
         return reviewStorage.update(review);
     }
 
-
     public long deleteReview(Long reviewId) {
         if (!reviewStorage.existById(reviewId)) {
             throw new ReviewNotFoundException("Отзыва с таким id " + reviewId + " не существует");
@@ -49,7 +48,6 @@ public class ReviewService {
         reviewStorage.delete(reviewId);
         return userId;
     }
-
 
     private Review mapReviewDtoToReview(ReviewDto reviewDto) {
         return Review.builder()

@@ -186,6 +186,4 @@ public class ReviewDbStorage implements ReviewStorage {
     public Long getUserIdFromReview(Long reviewId) {
         return jdbc.queryForObject(GET_USER_ID_FROM_REVIEW_QUERY, Long.class, reviewId);
     }
-
-
 }

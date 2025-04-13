@@ -10,7 +10,6 @@ import java.sql.Timestamp;
 public class Event {
     private Long userId;
     private Long timestamp;
-
     private EventType eventType;
     private Operation operation;
     private Long eventId;

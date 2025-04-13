@@ -103,7 +103,6 @@ public class FilmService {
 
         }
 
-
         List<Director> directors = Collections.emptyList();
         if (filmDto.getDirectors() != null && !filmDto.getDirectors().isEmpty()) {
             directors = directorService.getDirectorsByFilmId(filmId);

@@ -173,7 +173,6 @@ public class UserService {
         eventStorage.saveEvent(userId, eventType, operation, entityId);
     }
 
-
     public List<Event> getUserEvents(Long userId) {
         if (userId == null || !userStorage.existById(userId)) {
             throw new UserNotFoundException("Пользователя с id: " + userId + " не удалось найти :(");
