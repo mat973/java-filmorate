@@ -20,5 +20,4 @@ public class Film {
     private Integer mpa;
     private List<Integer> genres;
     private List<Long> directors;
-
 }

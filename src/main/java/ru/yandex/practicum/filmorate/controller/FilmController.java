@@ -31,7 +31,6 @@ public class FilmController {
         log.debug("Начало обработки запроса на создание фильма: {}", filmDto);
         log.warn(filmDto.toString());
         return filmService.createFilm(filmDto);
-
     }
 
     @PutMapping()
@@ -55,10 +54,22 @@ public class FilmController {
         return filmService.getFilmWithGenre(filmId);
     }
 
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<FilmDto> getFilmsByNameOrDirector(
+            @RequestParam(required = false) String query,
+            @RequestParam List<String> by
+    ) {
+        log.debug("Запрос на поиск фильмов с параметрами: {}, {}", query, by);
+        List<FilmDto> films = filmService.getFilmsByNameOrDirector(query, by);
+        log.info("Вернули список фильмов: {}", films);
+        return films;
+    }
+
     @PutMapping("/{filmId}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        log.info("Запрос на добавление лйка фильму с filmId {} от пользоватля с userId {}", filmId, userId);
+        log.info("Запрос на добавление лйка фильму с filmId {} от пользователя с userId {}", filmId, userId);
         filmService.addLike(filmId, userId);
         userService.createEvent(userId, EventType.LIKE, Operation.ADD, filmId);
     }
@@ -66,14 +77,14 @@ public class FilmController {
     @DeleteMapping("/{filmId}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        log.info("Запрос на удаление лйка фильму с filmId {} от пользоватля с userId {}", filmId, userId);
+        log.info("Запрос на удаление лйка фильму с filmId {} от пользователя с userId {}", filmId, userId);
         filmService.deleteLike(filmId, userId);
         userService.createEvent(userId, EventType.LIKE, Operation.REMOVE, filmId);
     }
 
     @GetMapping("/popular")
     @ResponseStatus(HttpStatus.OK)
-    public List<FilmDto> getPopularFilmsByGenreOfYear(
+    public List<FilmDto> getPopularFilms(
             @RequestParam(defaultValue = "10") Integer count,
             @RequestParam(required = false) Integer genreId,
             @RequestParam(required = false) Integer year) {
@@ -83,7 +94,7 @@ public class FilmController {
 
     @GetMapping("/director/{directorId}")
     public List<FilmDto> getFimByDirectorId(@PathVariable Long directorId, @RequestParam String sortBy) {
-        log.info("Запрос на получение фильмов режисера с id {} тсартированных по {}", directorId, sortBy);
+        log.info("Запрос на получение фильмов режиссера с id {} отсортированных по {}", directorId, sortBy);
         return filmService.getFilmsByDirectorId(directorId, sortBy);
     }
 }

@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.anatation.NotNegative;
+import ru.yandex.practicum.filmorate.annotation.NotNegative;
 
 @Data
 public class ReviewDto {

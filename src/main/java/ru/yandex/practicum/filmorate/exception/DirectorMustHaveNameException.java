@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exeption;
+package ru.yandex.practicum.filmorate.exception;
 
 public class DirectorMustHaveNameException extends RuntimeException {
     public DirectorMustHaveNameException(String message) {
