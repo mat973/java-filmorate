@@ -98,4 +98,10 @@ public class UserController {
     public List<Event> getUserEvents(@PathVariable Long userId) {
         return userService.getUserEvents(userId);
     }
+
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUserById(@PathVariable Long userId) {
+        userService.deleteUserById(userId);
+    }
 }

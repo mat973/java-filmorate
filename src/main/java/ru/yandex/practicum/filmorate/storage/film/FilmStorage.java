@@ -35,6 +35,5 @@ public interface FilmStorage {
 
     List<Film> getDirectorFilmSortByLikes(Long directorId);
 
+    void deleteFilmById(Long filmId);
 }
-
-
