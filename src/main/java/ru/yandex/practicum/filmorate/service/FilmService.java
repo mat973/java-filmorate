@@ -1,12 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.FullFilm;
 import ru.yandex.practicum.filmorate.dto.Genre;
 import ru.yandex.practicum.filmorate.dto.Mpa;
-import ru.yandex.practicum.filmorate.exeption.*;
+import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -17,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
@@ -103,7 +105,6 @@ public class FilmService {
 
         }
 
-
         List<Director> directors = Collections.emptyList();
         if (filmDto.getDirectors() != null && !filmDto.getDirectors().isEmpty()) {
             directors = directorService.getDirectorsByFilmId(filmId);
@@ -142,7 +143,7 @@ public class FilmService {
         Duration duration = Duration.ofMinutes(filmDto.getDuration());
 
         if (filmDto.getMpa() == null) {
-            throw new MpaNotExistException("Рейтинг не может быть путсым");
+            throw new MpaNotExistException("Рейтинг не может быть пустым");
         }
         List<Integer> genres;
         if (filmDto.getGenres() == null || filmDto.getGenres().isEmpty()) {
@@ -154,7 +155,9 @@ public class FilmService {
         if (filmDto.getDirectors() == null || filmDto.getDirectors().isEmpty()) {
             directors = null;
         } else {
-            directors = filmDto.getDirectors().stream().map(Director::getId).collect(Collectors.toSet()).stream().toList();
+            directors = filmDto.getDirectors().stream()
+                    .map(Director::getId)
+                    .collect(Collectors.toSet()).stream().toList();
         }
 
         return Film.builder()
@@ -195,7 +198,6 @@ public class FilmService {
                 .build();
     }
 
-
     public List<FilmDto> getFilmsByDirectorId(Long directorId, String sortBy) {
         if (!directorService.existDirector(directorId)) {
             throw new DirectorNotExistException("Директор с id " + directorId + " не найден");
@@ -209,7 +211,9 @@ public class FilmService {
                     .map(FilmService::mapToFilDto)
                     .collect(Collectors.toList());
         } else {
-            throw new SortByNotCorrectException("Выберите сортировку или по году или по количеству лайков year,likes()");
+            throw new SortByNotCorrectException(
+                    "Выберите сортировку или по году или по количеству лайков year,likes()"
+            );
         }
     }
 
@@ -218,8 +222,32 @@ public class FilmService {
                 .map(FilmService::mapToFilDto)
                 .collect(Collectors.toList());
     }
+
+    public List<FilmDto> getFilmsByNameOrDirector(String query, List<String> by) {
+        if (query == null || by == null || by.size() > 2) {
+            throw new IllegalArgumentException("Некорректные параметры поиска!");
+        }
+        if (by.size() == 1) {
+            if (by.contains("title")) {
+                return filmStorage.getFilmsByName(query)
+                        .stream()
+                        .map(FilmService::mapToFilDto)
+                        .collect(Collectors.toList());
+            } else if (by.contains("director")) {
+                return filmStorage.getFilmsByDirector(query)
+                        .stream()
+                        .map(FilmService::mapToFilDto)
+                        .collect(Collectors.toList());
+            } else {
+                throw new IllegalArgumentException(
+                        "Некорректные параметры поиска! Ожидается одно из полей: title, director"
+                );
+            }
+        } else {
+            return filmStorage.getFilmsByNameAndDirector(query)
+                    .stream()
+                    .map(FilmService::mapToFilDto)
+                    .collect(Collectors.toList());
+        }
+    }
 }
-
-
-
-

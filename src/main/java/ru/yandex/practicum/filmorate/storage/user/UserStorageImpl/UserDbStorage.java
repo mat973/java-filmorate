@@ -6,8 +6,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exeption.UserAddFriendException;
-import ru.yandex.practicum.filmorate.exeption.UserDeleteFriendException;
+import ru.yandex.practicum.filmorate.exception.UserAddFriendException;
+import ru.yandex.practicum.filmorate.exception.UserDeleteFriendException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
