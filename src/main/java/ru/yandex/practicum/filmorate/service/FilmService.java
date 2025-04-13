@@ -75,17 +75,17 @@ public class FilmService {
             throw new UserNotFoundException("Пользователь с одним из идентификаторов не найден");
         }
 
+        // Получение фильмов пользователя и друга
         List<Film> userFilms = filmStorage.getFilmsByUserId(userId);
         List<Film> friendFilms = filmStorage.getFilmsByUserId(friendId);
 
+        // Находим общие фильмы
         Set<Film> commonFilms = new HashSet<>(userFilms);
         commonFilms.retainAll(friendFilms);
 
-        List<Film> sortedCommonFilms = commonFilms.stream()
+        // Сортируем по популярности, затем мапируем в FilmDto
+        return commonFilms.stream()
                 .sorted(Comparator.comparingInt(this::getFilmPopularity).reversed())
-                .collect(Collectors.toList());
-
-        return sortedCommonFilms.stream()
                 .map(FilmService::mapToFilDto)
                 .collect(Collectors.toList());
     }
@@ -277,4 +277,5 @@ public class FilmService {
         }
     }
 }
+
 
