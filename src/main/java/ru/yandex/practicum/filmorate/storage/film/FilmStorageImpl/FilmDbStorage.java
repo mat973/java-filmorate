@@ -245,6 +245,17 @@ public class FilmDbStorage implements FilmStorage {
             GROUP BY
             f.film_id
             """;
+    private static final String GET_COMMON_FILMS_QUERY = """
+            SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.rating_id,
+                   COUNT(fl.user_id) AS likes
+            FROM films f
+            JOIN film_likes fl ON f.film_id = fl.film_id
+            WHERE fl.user_id IN (?, ?)
+            GROUP BY f.film_id
+            HAVING COUNT(fl.user_id) = 2
+            ORDER BY likes DESC
+            """;
+
     private static final String GET_FILM_BY_DIRECTOR_LIKE_QUERY = """
             SELECT
               f.film_id,
@@ -316,6 +327,15 @@ public class FilmDbStorage implements FilmStorage {
 
         return film;
     }
+
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        try {
+            return jdbc.query(GET_COMMON_FILMS_QUERY, filmRowMapper, userId, friendId);
+        } catch (EmptyResultDataAccessException e) {
+            return List.of();
+        }
+    }
+
 
     @Override
     public Film update(Film film) {
@@ -406,4 +426,15 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getDirectorFilmSortByLikes(Long directorId) {
         return jdbc.query(GET_DIRECTOR_FILM_SORT_BY_LIKES, filmRowMapper, directorId);
     }
+
+    @Override
+    public List<Film> getFilmsByUserId(Long userId) {
+        return List.of();
+    }
+
+    @Override
+    public int getLikesCount(Long filmId) {
+        return 0;
+    }
+
 }

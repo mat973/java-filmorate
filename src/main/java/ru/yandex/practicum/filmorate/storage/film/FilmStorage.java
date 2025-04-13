@@ -35,6 +35,10 @@ public interface FilmStorage {
 
     List<Film> getDirectorFilmSortByLikes(Long directorId);
 
+    List<Film> getFilmsByUserId(Long userId);
+
+    int getLikesCount(Long filmId);
+
 }
 
 

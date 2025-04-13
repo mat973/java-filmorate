@@ -66,6 +66,14 @@ public class FilmController {
         return films;
     }
 
+    @GetMapping("/common")
+    @ResponseStatus(HttpStatus.OK)
+    public List<FilmDto> getCommonFilms(@RequestParam Long userId, @RequestParam Long friendId) {
+        log.info("Запрос на получение общих фильмов между пользователем с id {} и другом с id {}", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+
     @PutMapping("/{filmId}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
