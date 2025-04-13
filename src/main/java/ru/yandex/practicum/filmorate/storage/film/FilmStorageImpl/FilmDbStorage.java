@@ -6,6 +6,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmNotUpdateException;
 import ru.yandex.practicum.filmorate.exception.GenreNotExistException;
 import ru.yandex.practicum.filmorate.exception.MpaNotExistException;
@@ -65,14 +66,14 @@ public class FilmDbStorage implements FilmStorage {
                 STRING_AGG(fg.genre_id, ',') AS genres,
                 STRING_AGG(df.DIRECTOR_ID, ',') AS directors
             FROM films f
-            JOIN ratings r ON f.rating_id = r.rating_id
-            JOIN film_genre fg ON f.film_id = fg.film_id
+            LEFT JOIN ratings r ON f.rating_id = r.rating_id
+            LEFT JOIN film_genre fg ON f.film_id = fg.film_id
             LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
             WHERE f.FILM_ID = ?
+            GROUP BY f.film_id
             """;
     private static final String SET_LIKE_QUERY = "INSERT INTO FILM_LIKES (USER_ID, FILM_ID) VALUES (?,?)";
     private static final String SET_DISLIKE_QUERY = "DELETE FROM FILM_LIKES WHERE user_id = ? AND FILM_ID = ?";
-
     private static final String GET_POPULAR_FILMS_QUERY = """
                     SELECT
                         f.film_id,
@@ -303,6 +304,7 @@ public class FilmDbStorage implements FilmStorage {
             GROUP BY
             f.film_id
             """;
+    private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE film_id = ?";
 
     @Override
     public Film save(Film film) {
@@ -441,5 +443,17 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public int getLikesCount(Long filmId) {
         return 0;
+
+    @Override
+    public void deleteFilmById(Long filmId) {
+        if (existById(filmId)) {
+            if ((jdbc.update(DELETE_FILM_QUERY, filmId) == 1)) {
+                log.info("Фильм с id = {} удален", filmId);
+            }
+        } else {
+            throw new FilmNotFoundException(
+                    "Фильм с id = " + filmId + " не существует"
+            );
+        }
     }
 }

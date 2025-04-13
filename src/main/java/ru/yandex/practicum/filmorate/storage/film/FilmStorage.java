@@ -30,7 +30,6 @@ public interface FilmStorage {
 
     List<Film> getRecommendations(Long userId);
 
-
     List<Film> getDirectorFilmSortByYear(Long directorId);
 
     List<Film> getDirectorFilmSortByLikes(Long directorId);
@@ -38,8 +37,7 @@ public interface FilmStorage {
     List<Film> getFilmsByUserId(Long userId);
 
     int getLikesCount(Long id);
+
+    void deleteFilmById(Long filmId);
 }
-
-
-
 
