@@ -224,7 +224,6 @@ public class FilmDbStorage implements FilmStorage {
               f.release_date,\s
               f.duration,\s
               f.rating_id,\s
-            
               GROUP_CONCAT(DISTINCT fg.genre_id) AS genres,\s
               GROUP_CONCAT(DISTINCT df.director_id) AS directors\s
             FROM\s
