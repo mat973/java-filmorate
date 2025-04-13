@@ -7,8 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.ReviewDto;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,26 +22,32 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
+    private final UserService userService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public Review createReview(@Valid @RequestBody ReviewDto reviewDto) {
         log.info("Начался запрос о созании нового отзыва.");
-        return reviewService.create(reviewDto);
+        Review review = reviewService.create(reviewDto);
+        userService.createEvent(review.getUserId(), EventType.REVIEW, Operation.ADD, review.getReviewId());
+        return review;
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public Review updateReview(@Valid @RequestBody ReviewDto reviewDto) {
         log.info("Обновления отзыва с id {}", reviewDto.getReviewId());
-        return reviewService.update(reviewDto, reviewDto.getReviewId());
+        Review review = reviewService.update(reviewDto, reviewDto.getReviewId());
+        userService.createEvent(review.getUserId(), EventType.REVIEW, Operation.UPDATE, review.getReviewId());
+        return review;
     }
 
     @DeleteMapping("/{reviewId}")
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable Long reviewId) {
         log.info("Удаление review с id {}", reviewId);
-        reviewService.deleteReview(reviewId);
+        Long  userId = reviewService.deleteReview(reviewId);
+        userService.createEvent(userId, EventType.REVIEW, Operation.REMOVE, reviewId);
     }
 
     @GetMapping("/{reviewId}")

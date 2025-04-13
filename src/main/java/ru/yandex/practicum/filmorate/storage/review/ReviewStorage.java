@@ -26,4 +26,6 @@ public interface ReviewStorage {
     void deleteLikeFromReview(Long reviewId, Long userId);
 
     void deleteDislikeFromReview(Long reviewId, Long userId);
+
+    Long getUserIdFromReview(Long reviewId);
 }

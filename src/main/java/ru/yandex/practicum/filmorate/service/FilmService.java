@@ -223,6 +223,7 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
+
     public List<FilmDto> getFilmsByNameOrDirector(String query, List<String> by) {
         if (query == null || by == null || by.size() > 2) {
             throw new IllegalArgumentException("Некорректные параметры поиска!");
@@ -251,3 +252,4 @@ public class FilmService {
         }
     }
 }
+

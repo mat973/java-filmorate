@@ -40,14 +40,14 @@ public class ReviewService {
         return reviewStorage.update(review);
     }
 
-
-    public void deleteReview(Long reviewId) {
+    public long deleteReview(Long reviewId) {
         if (!reviewStorage.existById(reviewId)) {
             throw new ReviewNotFoundException("Отзыва с таким id " + reviewId + " не существует");
         }
+        Long userId = reviewStorage.getUserIdFromReview(reviewId);
         reviewStorage.delete(reviewId);
+        return userId;
     }
-
 
     private Review mapReviewDtoToReview(ReviewDto reviewDto) {
         return Review.builder()

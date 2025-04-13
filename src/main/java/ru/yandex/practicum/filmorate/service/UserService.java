@@ -7,11 +7,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.UserDto;
+
+
 import ru.yandex.practicum.filmorate.exception.DateNotExistException;
 import ru.yandex.practicum.filmorate.exception.FriendsException;
 import ru.yandex.practicum.filmorate.exception.LoginContainSpaceException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Operation;
+
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -29,6 +36,7 @@ public class UserService {
 
 
     private final UserStorage userStorage;
+    private final EventStorage eventStorage;
 
     public User createUser(UserDto userDto) {
         return userStorage.save(mapToUser(userDto));
@@ -164,5 +172,15 @@ public class UserService {
         return false;
     }
 
+    public void createEvent(Long userId, EventType eventType, Operation operation, Long entityId) {
+        eventStorage.saveEvent(userId, eventType, operation, entityId);
+    }
 
+    public List<Event> getUserEvents(Long userId) {
+        if (userId == null || !userStorage.existById(userId)) {
+            throw new UserNotFoundException("Пользователя с id: " + userId + " не удалось найти :(");
+        }
+        return eventStorage.getUserEvents(userId);
+
+    }
 }
