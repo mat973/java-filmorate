@@ -441,10 +441,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public int getLikesCount(Long filmId) {
-        return 0;
-
-    @Override
     public void deleteFilmById(Long filmId) {
         if (existById(filmId)) {
             if ((jdbc.update(DELETE_FILM_QUERY, filmId) == 1)) {

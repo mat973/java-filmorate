@@ -82,15 +82,9 @@ public class FilmService {
         commonFilms.retainAll(friendFilms);
 
         return commonFilms.stream()
-                .sorted(Comparator.comparingInt(this::getFilmPopularity).reversed())
                 .map(FilmService::mapToFilDto)
                 .collect(Collectors.toList());
     }
-
-    private int getFilmPopularity(Film film) {
-        return filmStorage.getLikesCount(film.getId());
-    }
-
 
     public void deleteLike(Long filmId, Long userId) {
         if (userId == null || !userService.contain(userId)) {
