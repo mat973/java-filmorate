@@ -169,7 +169,7 @@ public class UserService {
         return false;
     }
 
-    public void createEvent(Long userId, EventType eventType, Operation operation, Long entityId){
+    public void createEvent(Long userId, EventType eventType, Operation operation, Long entityId) {
         eventStorage.saveEvent(userId, eventType, operation, entityId);
     }
 
