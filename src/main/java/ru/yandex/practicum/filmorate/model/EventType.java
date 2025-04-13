@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
 public enum EventType {
-    LIKE ("LIKE"),
-    REVIEW ("REVIEW"),
-    FRIEND ("FRIEND");
+    LIKE("LIKE"),
+    REVIEW("REVIEW"),
+    FRIEND("FRIEND");
 
     EventType(String title) {
         this.title = title;
