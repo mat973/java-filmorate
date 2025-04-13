@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.UserDto;
-
-
 import ru.yandex.practicum.filmorate.exception.DateNotExistException;
 import ru.yandex.practicum.filmorate.exception.FriendsException;
 import ru.yandex.practicum.filmorate.exception.LoginContainSpaceException;
@@ -16,7 +14,6 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Operation;
-
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -182,5 +179,9 @@ public class UserService {
         }
         return eventStorage.getUserEvents(userId);
 
+    }
+
+    public void deleteUserById(Long userId) {
+        userStorage.deleteUserById(userId);
     }
 }

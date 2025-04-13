@@ -29,7 +29,6 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     public FilmDto createFilm(@Valid @RequestBody FilmDto filmDto) {
         log.debug("Начало обработки запроса на создание фильма: {}", filmDto);
-        log.warn(filmDto.toString());
         return filmService.createFilm(filmDto);
     }
 
@@ -62,14 +61,14 @@ public class FilmController {
     ) {
         log.debug("Запрос на поиск фильмов с параметрами: {}, {}", query, by);
         List<FilmDto> films = filmService.getFilmsByNameOrDirector(query, by);
-        log.info("Вернули список фильмов: {}", films);
+        log.debug("Вернули список фильмов: {}", films);
         return films;
     }
 
     @PutMapping("/{filmId}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        log.info("Запрос на добавление лйка фильму с filmId {} от пользователя с userId {}", filmId, userId);
+        log.info("Запрос на добавление лайка фильму с filmId {} от пользователя с userId {}", filmId, userId);
         filmService.addLike(filmId, userId);
         userService.createEvent(userId, EventType.LIKE, Operation.ADD, filmId);
     }
@@ -96,5 +95,12 @@ public class FilmController {
     public List<FilmDto> getFimByDirectorId(@PathVariable Long directorId, @RequestParam String sortBy) {
         log.info("Запрос на получение фильмов режиссера с id {} отсортированных по {}", directorId, sortBy);
         return filmService.getFilmsByDirectorId(directorId, sortBy);
+    }
+
+    @DeleteMapping("/{filmId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteFilmById(@PathVariable Long filmId) {
+        log.debug("Запрос на удаление фильма с id {}", filmId);
+        filmService.deleteFilmById(filmId);
     }
 }
