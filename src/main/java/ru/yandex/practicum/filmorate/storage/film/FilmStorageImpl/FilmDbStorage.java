@@ -82,7 +82,7 @@ public class FilmDbStorage implements FilmStorage {
             WHERE f.FILM_ID = ?
             GROUP BY f.film_id
             """;
-    private static final String SET_LIKE_QUERY = "INSERT INTO FILM_LIKES (USER_ID, FILM_ID) VALUES (?,?)";
+    private static final String SET_LIKE_QUERY = "MERGE INTO FILM_LIKES (USER_ID, FILM_ID) KEY (USER_ID, FILM_ID) VALUES (?, ?);";
     private static final String SET_DISLIKE_QUERY = "DELETE FROM FILM_LIKES WHERE user_id = ? AND FILM_ID = ?";
     private static final String GET_POPULAR_FILMS_QUERY = """
                     SELECT
@@ -259,79 +259,79 @@ public class FilmDbStorage implements FilmStorage {
               COUNT(fl.user_id) DESC
             """;
     private static final String GET_FILM_BY_NAME_LIKE_QUERY = """
-            SELECT
-              f.film_id,
-              f.title,
-              f.description,
-              f.release_date,
-              f.duration,
-              f.rating_id,
-              r.name AS rating_name,
-              STRING_AGG(fg.genre_id, ',') AS genres,
-              STRING_AGG(g.name, ',') AS genres_name,
-              STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
-              STRING_AGG(d.NAME, ',') AS directors_name
-            FROM
-              films f
-              JOIN ratings r ON f.rating_id = r.rating_id
-              LEFT JOIN director_film df ON f.film_id = df.film_id
-              LEFT JOIN film_genre fg ON f.film_id = fg.film_id
-              LEFT JOIN GENRE g on g.genre_id = fg.genre_id
-              LEFT JOIN film_likes fl ON f.film_id = fl.film_id
-            WHERE
-            f.title LIKE ?
-            GROUP BY
-            f.film_id
+SELECT
+  f.film_id,
+  f.title,
+  f.description,
+  f.release_date,
+  f.duration,
+  f.rating_id,
+  r.name AS rating_name,
+  STRING_AGG(CAST(fg.genre_id AS VARCHAR), ',') AS genres,
+  STRING_AGG(g.name, ',') AS genres_name,
+  STRING_AGG(CAST(df.director_id AS VARCHAR), ',') AS directors,
+  STRING_AGG(d.name, ',') AS directors_name
+FROM
+  films f
+  JOIN ratings r ON f.rating_id = r.rating_id
+  LEFT JOIN director_film df ON f.film_id = df.film_id
+  LEFT JOIN director d ON df.director_id = d.director_id
+  LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+  LEFT JOIN genre g ON g.genre_id = fg.genre_id
+WHERE
+  f.title LIKE ?
+GROUP BY
+  f.film_id
             """;
     private static final String GET_FILM_BY_DIRECTOR_LIKE_QUERY = """
-            SELECT
-              f.film_id,
-              f.title,
-              f.description,
-              f.release_date,
-              f.duration,
-              f.rating_id,
-              r.name AS rating_name,
-              STRING_AGG(fg.genre_id, ',') AS genres,
-              STRING_AGG(g.name, ',') AS genres_name,
-              STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
-              STRING_AGG(d.NAME, ',') AS directors_name
-            FROM
-              films f
-              JOIN ratings r ON f.rating_id = r.rating_id
-              LEFT JOIN director_film df ON f.film_id = df.film_id
-              LEFT JOIN director d ON df.director_id = d.director_id
-              LEFT JOIN film_genre fg ON f.film_id = fg.film_id
-              LEFT JOIN GENRE g on g.genre_id = fg.genre_id
-              LEFT JOIN film_likes fl ON f.film_id = fl.film_id
-            WHERE
-            d.name LIKE ?
+SELECT
+  f.film_id,
+  f.title,
+  f.description,
+  f.release_date,
+  f.duration,
+  f.rating_id,
+  r.name AS rating_name,
+  STRING_AGG(CAST(fg.genre_id AS VARCHAR), ',') AS genres,
+  STRING_AGG(g.name, ',') AS genres_name,
+  STRING_AGG(CAST(df.director_id AS VARCHAR), ',') AS directors,
+  STRING_AGG(d.name, ',') AS directors_name
+FROM
+  films f
+  JOIN ratings r ON f.rating_id = r.rating_id
+  LEFT JOIN director_film df ON f.film_id = df.film_id
+  LEFT JOIN director d ON df.director_id = d.director_id
+  LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+  LEFT JOIN genre g ON g.genre_id = fg.genre_id
+WHERE
+  d.name LIKE ?
+GROUP BY
+  f.film_id
             """;
     private static final String GET_FILM_BY_NAME_OR_DIRECTOR_QUERY = """
-            SELECT
-              f.film_id,
-              f.title,
-              f.description,
-              f.release_date,
-              f.duration,
-              f.rating_id,
-              r.name AS rating_name,
-              STRING_AGG(fg.genre_id, ',') AS genres,
-              STRING_AGG(g.name, ',') AS genres_name,
-              STRING_AGG(df.DIRECTOR_ID, ',') AS ,
-              STRING_AGG(d.NAME, ',') AS directors_name
-            FROM
-              films f
-              JOIN ratings r ON f.rating_id = r.rating_id
-              LEFT JOIN director_film df ON f.film_id = df.film_id
-              LEFT JOIN director d ON df.director_id = d.director_id
-              LEFT JOIN film_genre fg ON f.film_id = fg.film_id
-              LEFT JOIN GENRE g on g.genre_id = fg.genre_id
-              LEFT JOIN film_likes fl ON f.film_id = fl.film_id
-            WHERE
-            f.title LIKE ? OR d.name LIKE ?
-            GROUP BY
-            f.film_id
+SELECT
+  f.film_id,
+  f.title,
+  f.description,
+  f.release_date,
+  f.duration,
+  f.rating_id,
+  r.name AS rating_name,
+  STRING_AGG(CAST(fg.genre_id AS VARCHAR), ',') AS genres,
+  STRING_AGG(g.name, ',') AS genres_name,
+  STRING_AGG(CAST(df.director_id AS VARCHAR), ',') AS directors,
+  STRING_AGG(d.name, ',') AS directors_name
+FROM
+  films f
+  JOIN ratings r ON f.rating_id = r.rating_id
+  LEFT JOIN director_film df ON f.film_id = df.film_id
+  LEFT JOIN director d ON df.director_id = d.director_id
+  LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+  LEFT JOIN genre g ON g.genre_id = fg.genre_id
+WHERE
+  f.title LIKE ? OR d.name like ?
+GROUP BY
+  f.film_id
             """;
     private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE film_id = ?";
 
