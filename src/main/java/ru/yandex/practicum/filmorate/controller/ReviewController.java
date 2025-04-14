@@ -46,7 +46,7 @@ public class ReviewController {
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable Long reviewId) {
         log.info("Удаление review с id {}", reviewId);
-        Long  userId = reviewService.deleteReview(reviewId);
+        Long userId = reviewService.deleteReview(reviewId);
         userService.createEvent(userId, EventType.REVIEW, Operation.REMOVE, reviewId);
     }
 
@@ -63,17 +63,9 @@ public class ReviewController {
         log.info("Вывод комментариев по входным критериям");
         Long fId;
         Long amount;
-        if (filmId.isEmpty()) {
-            fId = -1L;
-        } else {
-            fId = filmId.get();
-        }
+        fId = filmId.orElse(-1L);
 
-        if (count.isEmpty()) {
-            amount = 10L;
-        } else {
-            amount = count.get();
-        }
+        amount = count.orElse(10L);
         return reviewService.getReviews(fId, amount);
     }
 

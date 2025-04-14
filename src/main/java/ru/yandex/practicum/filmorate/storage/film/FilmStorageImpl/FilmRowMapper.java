@@ -33,9 +33,9 @@ public class FilmRowMapper implements RowMapper<Film> {
                 .build();
     }
 
-    private List<Genre> convertGenre(String id, String name){
+    private List<Genre> convertGenre(String id, String name) {
         List<Genre> genres = new ArrayList<>();
-        if (id == null){
+        if (id == null) {
             return genres;
         }
         String[] ids = id.split(",");
@@ -47,9 +47,9 @@ public class FilmRowMapper implements RowMapper<Film> {
         return genres;
     }
 
-    private List<Director> convertDirector(String id, String name){
+    private List<Director> convertDirector(String id, String name) {
         List<Director> directors = new ArrayList<>();
-        if (id == null){
+        if (id == null) {
             return directors;
         }
         String[] ids = id.split(",");

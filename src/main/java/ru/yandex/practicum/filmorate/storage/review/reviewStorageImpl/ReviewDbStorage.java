@@ -60,7 +60,7 @@ public class ReviewDbStorage implements ReviewStorage {
                        review_score rs ON r.review_id = rs.review_id
                    GROUP BY
                        r.review_id, r.content, r.positive, r.user_id, r.film_id
-                   ORDER BY r.review_id DESC
+                   ORDER BY usefull DESC ,r.review_id ASC
                    LIMIT ?
             """;
 
@@ -74,17 +74,13 @@ public class ReviewDbStorage implements ReviewStorage {
                         WHEN rs.isPositive = TRUE THEN 1
                         WHEN rs.isPositive = FALSE THEN -1
                         ELSE 0
-                        END), 0) AS usefull
-                   FROM
-                       review r
-                   WHERE
-                       r.film_id = ?
-                   LEFT JOIN
-                       review_score rs ON r.review_id = rs.review_id
-                   GROUP BY
-                       r.review_id, r.content, r.positive, r.user_id, r.film_id
-                   ORDER BY r.review_id DESC
-                   LIMIT ?
+                   END), 0) AS usefull
+            FROM review r
+            LEFT JOIN review_score rs ON r.review_id = rs.review_id
+            WHERE r.film_id = ?
+            GROUP BY r.review_id, r.content, r.positive, r.user_id, r.film_id
+            ORDER BY usefull DESC ,r.review_id ASC
+            LIMIT ?
             """;
 
     private static final String ADD_LIKE_QUERY = """
@@ -159,7 +155,8 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public List<Review> getReviews(Long filmId, Long count) {
-        return jdbc.query(GET_ALL_WITH_LIMIT_AND_FILM_ID_QUERY, rowMapper, filmId, count);
+        List<Review> reviews = jdbc.query(GET_ALL_WITH_LIMIT_AND_FILM_ID_QUERY, rowMapper, filmId, count);
+        return reviews;
     }
 
     @Override

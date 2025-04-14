@@ -67,7 +67,7 @@ public class ReviewService {
     }
 
     public List<Review> getReviews(Long fId, Long amount) {
-        if (fId != -1) {
+        if (fId == -1) {
             return reviewStorage.getReviews(amount);
         } else {
             return reviewStorage.getReviews(fId, amount);
