@@ -24,7 +24,7 @@ public class DirectorStorage implements DirectorDbStorage {
     private static final String INSERT_QUERY = "INSERT INTO director (name) values (?)";
     private static final String GET_DIRECTOR_BY_ID = "SELECT * FROM director WHERE director_id = ?";
     private static final String UPDATE_QUERY = "UPDATE director SET name = ? where director_id = ?";
-    private static final String DELETE_QUERY = "DELETE FROM director WHERE ?";
+    private static final String DELETE_QUERY = "DELETE FROM director WHERE director_id = ?";
     private static final String GET_DIRECTOR_BY_FILM_ID_QUERY = """
                     SELECT d.DIRECTOR_ID , d.NAME
                     from DIRECTOR d

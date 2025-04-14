@@ -41,7 +41,7 @@ public class FilmController {
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
-    public List<Film> getAllFilms() {
+    public List<FilmDto> getAllFilms() {
         log.debug("Запрос на получение списка всех фильмов");
         return filmService.getAllFilms();
     }

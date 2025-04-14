@@ -49,8 +49,8 @@ public class FilmService {
         return mapToFilDto(filmStorage.update(newFilm));
     }
 
-    public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+    public List<FilmDto> getAllFilms() {
+        return filmStorage.getAllFilms().stream().map(FilmService::mapToFilDto).collect(Collectors.toList());
     }
 
     public FilmDto getFilmById(Long filmID) {
@@ -161,19 +161,17 @@ public class FilmService {
         if (filmDto.getMpa() == null) {
             throw new MpaNotExistException("Рейтинг не может быть пустым");
         }
-        List<Integer> genres;
+        List<Genre> genres;
         if (filmDto.getGenres() == null || filmDto.getGenres().isEmpty()) {
             genres = null;
         } else {
-            genres = filmDto.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()).stream().toList();
+            genres = filmDto.getGenres().stream().distinct().collect(Collectors.toList());
         }
-        List<Long> directors;
+        List<Director> directors;
         if (filmDto.getDirectors() == null || filmDto.getDirectors().isEmpty()) {
             directors = null;
         } else {
-            directors = filmDto.getDirectors().stream()
-                    .map(Director::getId)
-                    .collect(Collectors.toSet()).stream().toList();
+            directors = filmDto.getDirectors();
         }
 
         return Film.builder()
@@ -182,7 +180,7 @@ public class FilmService {
                 .duration(duration)
                 .title(filmDto.getName())
                 .releaseDate(date)
-                .mpa(filmDto.getMpa().getId())
+                .mpa(filmDto.getMpa())
                 .genres(genres)
                 .directors(directors)
                 .build();
@@ -193,13 +191,13 @@ public class FilmService {
         if (film.getGenres() == null || film.getGenres().isEmpty()) {
             genres = Collections.emptyList();
         } else {
-            genres = film.getGenres().stream().map(Genre::new).collect(Collectors.toList());
+            genres = film.getGenres().stream().distinct().collect(Collectors.toList());
         }
         List<Director> directors;
         if (film.getDirectors() == null || film.getDirectors().isEmpty()) {
             directors = Collections.emptyList();
         } else {
-            directors = film.getDirectors().stream().map(Director::new).collect(Collectors.toList());
+            directors = film.getDirectors();
         }
 
         return FilmDto.builder()
@@ -208,7 +206,7 @@ public class FilmService {
                 .name(film.getTitle())
                 .releaseDate(film.getReleaseDate().format(formater))
                 .duration(film.getDuration().getSeconds() / 60)
-                .mpa(new Mpa(film.getMpa()))
+                .mpa(film.getMpa())
                 .genres(genres)
                 .directors(directors)
                 .build();

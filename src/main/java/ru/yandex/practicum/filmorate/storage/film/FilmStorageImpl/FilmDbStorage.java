@@ -46,12 +46,17 @@ public class FilmDbStorage implements FilmStorage {
     private static final String DELETE_DIRECTOR_QUERY = "DELETE FROM director_film where film_id = ?";
     private static final String GET_ALL_FILMS_QUERY = """
              SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.RATING_ID AS rating_id,
+             r.name AS rating_name,
             STRING_AGG(fg.genre_id, ',') AS genres,
-            STRING_AGG(df.DIRECTOR_ID, ',') AS directors
+            STRING_AGG(g.name, ',') AS genres_name,
+            STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
+            STRING_AGG(d.NAME, ',') AS directors_name
             FROM films f
             JOIN ratings r ON f.rating_id = r.rating_id
             LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+            LEFT JOIN GENRE g on g.genre_id = fg.genre_id
             LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
+            LEFT JOIN DIRECTOR d ON d.DIRECTOR_ID = df.DIRECTOR_ID
             GROUP BY f.film_id
             ORDER BY f.film_id
             """;
@@ -63,12 +68,17 @@ public class FilmDbStorage implements FilmStorage {
                 f.release_date,
                 f.duration,
                 f.RATING_ID AS rating_id,
+                r.name AS rating_name,
                 STRING_AGG(fg.genre_id, ',') AS genres,
-                STRING_AGG(df.DIRECTOR_ID, ',') AS directors
+                STRING_AGG(g.name, ',') AS genres_name,
+                STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
+                STRING_AGG(d.NAME, ',') AS directors_name
             FROM films f
             LEFT JOIN ratings r ON f.rating_id = r.rating_id
             LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+            LEFT JOIN GENRE g on g.genre_id = fg.genre_id
             LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
+            LEFT JOIN DIRECTOR d ON d.DIRECTOR_ID = df.DIRECTOR_ID
             WHERE f.FILM_ID = ?
             GROUP BY f.film_id
             """;
@@ -82,16 +92,21 @@ public class FilmDbStorage implements FilmStorage {
                         f.release_date,
                         f.duration,
                         f.rating_id,
+                        r.name AS rating_name,
                         STRING_AGG(fg.genre_id, ',') AS genres,
-                        STRING_AGG(df.DIRECTOR_ID, ',') AS directors
+                        STRING_AGG(g.name, ',') AS genres_name,
+                        STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
+                        STRING_AGG(d.NAME, ',') AS directors_name
                     FROM films f
-                    JOIN ratings r ON f.rating_id = r.rating_id
-                    JOIN film_genre fg ON f.film_id = fg.film_id
+                    LEFT JOIN ratings r ON f.rating_id = r.rating_id
+                    LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+                    LEFT JOIN GENRE g on g.genre_id = fg.genre_id
                     LEFT JOIN film_likes fl ON fl.film_id = f.film_id
                     LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
+                    LEFT JOIN DIRECTOR d ON d.DIRECTOR_ID = df.DIRECTOR_ID
                     WHERE
-                        (fg.genre_id = ? OR ? IS NULL)  -- Условие для фильтрации по жанру
-                        AND (EXTRACT(YEAR FROM f.release_date) = ? OR ? IS NULL)  -- Условие для фильтрации по году
+                    (? IS NULL OR fg.genre_id = ?)
+                    AND (? IS NULL OR EXTRACT(YEAR FROM f.release_date) = ?)
                     GROUP BY f.film_id
                     ORDER BY
                         COUNT(fl.user_id) DESC,
@@ -102,28 +117,6 @@ public class FilmDbStorage implements FilmStorage {
     private static final String EXIST_BY_ID_QUERY = "SELECT COUNT(*) > 0 FROM films WHERE film_id = ?";
     private static final String EXIST_MPA_BY_ID_QUERY = "SELECT COUNT(*) FROM ratings WHERE rating_id = ?";
     private static final String EXIST_GENRE_BY_ID_QUERY = "SELECT COUNT(*)  FROM genre where genre_id = ?";
-    private static final String GET_FILM_BY_ID_GENRE = """
-            SELECT
-                f.film_id AS id,
-                f.title AS name,
-                f.description,
-                f.release_date AS releaseDate,
-                f.duration,
-                r.rating_id AS "mpa.id",
-                r.name AS "mpa.name",
-                JSON_AGG(
-                    JSON_BUILD_OBJECT(
-                        'id', g.genre_id,
-                        'name', g.name
-                    )
-                ) AS genres
-            FROM films f
-            JOIN ratings r ON f.rating_id = r.rating_id
-            LEFT JOIN film_genre fg ON f.film_id = fg.film_id
-            LEFT JOIN genres g ON fg.genre_id = g.genre_id
-            WHERE f.film_id = ?
-            GROUP BY f.film_id, r.rating_id
-            """;
     private static final String GET_RECOMMENDATION_QUERY = """
             SELECT\s
               f.film_id,\s
@@ -132,14 +125,19 @@ public class FilmDbStorage implements FilmStorage {
               f.release_date,\s
               f.duration,\s
               f.rating_id,\s
+              r.name AS rating_name,
               STRING_AGG(fg.genre_id, ',') AS genres,\s
-              STRING_AGG(df.DIRECTOR_ID, ',') AS directors
+              STRING_AGG(g.name, ',') AS genres_name,
+              STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
+              STRING_AGG(d.NAME, ',') AS directors_name
             FROM\s
               films f\s
-              JOIN ratings r ON f.rating_id = r.rating_id\s
-              JOIN film_genre fg ON f.film_id = fg.film_id\s
+              LEFT JOIN ratings r ON f.rating_id = r.rating_id\s
+              LEFT JOIN film_genre fg ON f.film_id = fg.film_id\s
+              LEFT JOIN GENRE g on g.genre_id = fg.genre_id
               LEFT JOIN film_likes fl ON fl.film_id = f.film_id\s
               LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
+              LEFT JOIN DIRECTOR d ON d.DIRECTOR_ID = df.DIRECTOR_ID
             WHERE\s
               f.film_id IN (
                 SELECT\s
@@ -185,11 +183,16 @@ public class FilmDbStorage implements FilmStorage {
             f.release_date,
             f.duration,
             f.rating_id,
-            GROUP_CONCAT(DISTINCT fg.genre_id) AS genres,
-            GROUP_CONCAT(DISTINCT df.director_id) AS directors
+            r.name AS rating_name,
+            STRING_AGG(fg.genre_id, ',') AS genres,
+            STRING_AGG(g.name, ',') AS genres_name,
+            STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
+            STRING_AGG(d.NAME, ',') AS directors_name
             FROM films f
+            JOIN ratings r ON f.rating_id = r.rating_id
             LEFT JOIN director_film df ON f.film_id = df.film_id
             LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+            LEFT JOIN GENRE g on g.genre_id = fg.genre_id
             LEFT JOIN film_likes fl ON f.film_id = fl.film_id
              WHERE fl.USER_ID = ?
              GROUP BY
@@ -203,13 +206,18 @@ public class FilmDbStorage implements FilmStorage {
               f.release_date,\s
               f.duration,\s
               f.RATING_ID AS rating_id,\s
+              r.name AS rating_name,
               STRING_AGG(fg.genre_id, ',') AS genres,\s
-              STRING_AGG(df.DIRECTOR_ID, ',') AS directors\s
+              STRING_AGG(g.name, ',') AS genres_name,
+              STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
+              STRING_AGG(d.NAME, ',') AS directors_name
             FROM\s
               films f\s
               JOIN ratings r ON f.rating_id = r.rating_id\s
               LEFT JOIN film_genre fg ON f.film_id = fg.film_id\s
-              LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID\s
+              LEFT JOIN GENRE g on g.genre_id = fg.genre_id
+              LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
+              LEFT JOIN DIRECTOR d ON d.DIRECTOR_ID = df.DIRECTOR_ID
             WHERE\s
               df.DIRECTOR_ID = ?\s
             GROUP BY\s
@@ -225,13 +233,19 @@ public class FilmDbStorage implements FilmStorage {
               f.release_date,\s
               f.duration,\s
               f.rating_id,\s
-              GROUP_CONCAT(DISTINCT fg.genre_id) AS genres,\s
-              GROUP_CONCAT(DISTINCT df.director_id) AS directors\s
+              r.name AS rating_name,
+              STRING_AGG(fg.genre_id, ',') AS genres,
+              STRING_AGG(g.name, ',') AS genres_name,
+              STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
+              STRING_AGG(d.NAME, ',') AS directors_name
             FROM\s
               films f\s
+              JOIN ratings r ON f.rating_id = r.rating_id
               JOIN director_film df ON f.film_id = df.film_id\s
               LEFT JOIN film_genre fg ON f.film_id = fg.film_id\s
+              LEFT JOIN GENRE g on g.genre_id = fg.genre_id
               LEFT JOIN film_likes fl ON f.film_id = fl.film_id\s
+              LEFT JOIN DIRECTOR d ON d.DIRECTOR_ID = df.DIRECTOR_ID
             WHERE\s
               df.director_id = ?\s
             GROUP BY\s
@@ -252,12 +266,17 @@ public class FilmDbStorage implements FilmStorage {
               f.release_date,
               f.duration,
               f.rating_id,
+              r.name AS rating_name,
               STRING_AGG(fg.genre_id, ',') AS genres,
-              STRING_AGG(df.DIRECTOR_ID, ',') AS directors
+              STRING_AGG(g.name, ',') AS genres_name,
+              STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
+              STRING_AGG(d.NAME, ',') AS directors_name
             FROM
               films f
+              JOIN ratings r ON f.rating_id = r.rating_id
               LEFT JOIN director_film df ON f.film_id = df.film_id
               LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+              LEFT JOIN GENRE g on g.genre_id = fg.genre_id
               LEFT JOIN film_likes fl ON f.film_id = fl.film_id
             WHERE
             f.title LIKE ?
@@ -272,13 +291,18 @@ public class FilmDbStorage implements FilmStorage {
               f.release_date,
               f.duration,
               f.rating_id,
-              GROUP_CONCAT(DISTINCT fg.genre_id) AS genres,
-              GROUP_CONCAT(DISTINCT df.director_id) AS directors
+              r.name AS rating_name,
+              STRING_AGG(fg.genre_id, ',') AS genres,
+              STRING_AGG(g.name, ',') AS genres_name,
+              STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
+              STRING_AGG(d.NAME, ',') AS directors_name
             FROM
               films f
+              JOIN ratings r ON f.rating_id = r.rating_id
               LEFT JOIN director_film df ON f.film_id = df.film_id
               LEFT JOIN director d ON df.director_id = d.director_id
               LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+              LEFT JOIN GENRE g on g.genre_id = fg.genre_id
               LEFT JOIN film_likes fl ON f.film_id = fl.film_id
             WHERE
             d.name LIKE ?
@@ -291,13 +315,18 @@ public class FilmDbStorage implements FilmStorage {
               f.release_date,
               f.duration,
               f.rating_id,
+              r.name AS rating_name,
               STRING_AGG(fg.genre_id, ',') AS genres,
-              STRING_AGG(df.DIRECTOR_ID, ',') AS directors
+              STRING_AGG(g.name, ',') AS genres_name,
+              STRING_AGG(df.DIRECTOR_ID, ',') AS ,
+              STRING_AGG(d.NAME, ',') AS directors_name
             FROM
               films f
+              JOIN ratings r ON f.rating_id = r.rating_id
               LEFT JOIN director_film df ON f.film_id = df.film_id
               LEFT JOIN director d ON df.director_id = d.director_id
               LEFT JOIN film_genre fg ON f.film_id = fg.film_id
+              LEFT JOIN GENRE g on g.genre_id = fg.genre_id
               LEFT JOIN film_likes fl ON f.film_id = fl.film_id
             WHERE
             f.title LIKE ? OR d.name LIKE ?
@@ -308,11 +337,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film save(Film film) {
-        if (jdbc.queryForObject(EXIST_MPA_BY_ID_QUERY, Integer.class, film.getMpa()) == 0) {
-            throw new MpaNotExistException("Рейтинга с id = " + film.getMpa() + " не существует");
+        if (jdbc.queryForObject(EXIST_MPA_BY_ID_QUERY, Integer.class, film.getMpa().getId()) == 0) {
+            throw new MpaNotExistException("Рейтинга с id = " + film.getMpa().getId() + " не существует");
         }
         if (film.getGenres() != null && !film.getGenres().stream()
-                .allMatch(genre -> jdbc.queryForObject(EXIST_GENRE_BY_ID_QUERY, Integer.class, genre) > 0)) {
+                .allMatch(genre -> jdbc.queryForObject(EXIST_GENRE_BY_ID_QUERY, Integer.class, genre.getId()) > 0)) {
             throw new GenreNotExistException("Жанра который вы указали не существует");
         }
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
@@ -322,16 +351,16 @@ public class FilmDbStorage implements FilmStorage {
             ps.setString(2, film.getDescription());
             ps.setDate(3, Date.valueOf(film.getReleaseDate()));
             ps.setLong(4, film.getDuration().toMinutes());
-            ps.setInt(5, film.getMpa());
+            ps.setInt(5, film.getMpa().getId());
             return ps;
         }, keyHolder);
         long filmId = keyHolder.getKey().longValue();
         film.setId(filmId);
         if (film.getGenres() != null) {
-            film.getGenres().forEach(x -> jdbc.update(INSERT_FILM_GENRE_QUERY, filmId, x));
+            film.getGenres().forEach(x -> jdbc.update(INSERT_FILM_GENRE_QUERY, filmId, x.getId()));
         }
         if (film.getDirectors() != null) {
-            film.getDirectors().forEach(x -> jdbc.update(INSERT_FILM_DIRECTOR, filmId, x));
+            film.getDirectors().forEach(x -> jdbc.update(INSERT_FILM_DIRECTOR, filmId, x.getId()));
         }
 
         return film;
@@ -344,7 +373,7 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDescription(),
                 Date.valueOf(film.getReleaseDate()),
                 film.getDuration().toMinutes(),
-                film.getMpa(),
+                film.getMpa().getId(),
                 film.getId());
 
         if (updated == 0) {
@@ -354,11 +383,11 @@ public class FilmDbStorage implements FilmStorage {
         jdbc.update(DELETE_FILM_GENRE_QUERY, film.getId());
         if (film.getGenres() != null) {
             film.getGenres().forEach(genre ->
-                    jdbc.update(INSERT_FILM_GENRE_QUERY, film.getId(), genre));
+                    jdbc.update(INSERT_FILM_GENRE_QUERY, film.getId(), genre.getId()));
         }
         jdbc.update(DELETE_DIRECTOR_QUERY, film.getId());
         if (film.getDirectors() != null) {
-            film.getDirectors().forEach(x -> jdbc.update(INSERT_FILM_DIRECTOR, film.getId(), x));
+            film.getDirectors().forEach(x -> jdbc.update(INSERT_FILM_DIRECTOR, film.getId(), x.getId()));
         }
         return film;
     }

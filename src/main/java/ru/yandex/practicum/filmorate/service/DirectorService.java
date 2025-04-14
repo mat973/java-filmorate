@@ -26,7 +26,7 @@ public class DirectorService {
     }
 
     public Director saveDirector(Director director) {
-        if (director.getName() == null) {
+        if (director.getName() == null || director.getName().isBlank()) {
             throw new DirectorMustHaveNameException("У директора должно быть имя");
         }
         return directorDbStorage.saveDirector(director);
