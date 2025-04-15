@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.Mpa;
-import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
+import ru.yandex.practicum.filmorate.exception.MpaNotExistException;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.util.List;
@@ -23,5 +23,9 @@ public class MpaService {
 
     public List<Mpa> getAllMpa() {
         return mpaStorage.getAllMpa();
+    }
+
+    public Boolean existMpa(Integer mpaId) {
+        return mpaStorage.existMpa(mpaId);
     }
 }

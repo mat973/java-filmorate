@@ -12,15 +12,30 @@ public interface FilmStorage {
 
     Optional<Film> find(Long filmId);
 
-    List<Film> getPopularFilms(Integer count);
+    List<Film> getPopularFilms(Integer count, Integer genreId, Integer year);
 
     Boolean existById(Long filmId);
 
     List<Film> getAllFilms();
 
+    List<Film> getFilmsByName(String query);
+
+    List<Film> getFilmsByDirector(String query);
+
+    List<Film> getFilmsByNameAndDirector(String query);
+
     void addLike(Long filmId, Long userId);
 
     void dislike(Long filmId, Long userId);
 
+    List<Film> getRecommendations(Long userId);
 
+    List<Film> getDirectorFilmSortByYear(Long directorId);
+
+    List<Film> getDirectorFilmSortByLikes(Long directorId);
+
+    List<Film> getFilmsByUserId(Long userId);
+
+    void deleteFilmById(Long filmId);
 }
+

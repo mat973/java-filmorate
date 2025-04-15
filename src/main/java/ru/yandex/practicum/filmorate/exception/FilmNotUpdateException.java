@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exeption;
+package ru.yandex.practicum.filmorate.exception;
 
 public class FilmNotUpdateException extends RuntimeException {
     public FilmNotUpdateException(String s) {

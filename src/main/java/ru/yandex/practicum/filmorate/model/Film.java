@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ru.yandex.practicum.filmorate.dto.Genre;
+import ru.yandex.practicum.filmorate.dto.Mpa;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -17,7 +19,7 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private Duration duration;
-    private Integer mpa;
-    private List<Integer> genres;
-
+    private Mpa mpa;
+    private List<Genre> genres;
+    private List<Director> directors;
 }

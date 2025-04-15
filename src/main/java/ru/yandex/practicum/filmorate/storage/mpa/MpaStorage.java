@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.Mpa;
-import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
+import ru.yandex.practicum.filmorate.exception.MpaNotExistException;
 
 import java.util.List;
 
@@ -33,5 +33,9 @@ public class MpaStorage {
 
     public List<Mpa> getAllMpa() {
         return jdbc.query(GET_ALL_MPA_QUERY, rowMapper);
+    }
+
+    public Boolean existMpa(Integer mpaId) {
+        return jdbc.queryForObject(EXIST_MPA_BY_ID_QUERY, Integer.class, mpaId) != 0;
     }
 }

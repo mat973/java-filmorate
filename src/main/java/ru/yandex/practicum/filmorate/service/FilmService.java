@@ -1,19 +1,15 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.FullFilm;
+import ru.yandex.practicum.filmorate.dto.Genre;
 import ru.yandex.practicum.filmorate.dto.Mpa;
-import ru.yandex.practicum.filmorate.exeption.DateIsToOldException;
-import ru.yandex.practicum.filmorate.exeption.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exeption.MpaNotExistException;
-import ru.yandex.practicum.filmorate.exeption.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.*;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.Duration;
@@ -22,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
@@ -30,11 +27,10 @@ public class FilmService {
     private final UserService userService;
     private final GenreService genreService;
     private final MpaService mpaService;
+    private final DirectorService directorService;
 
-    private final Logger log = LoggerFactory.getLogger(FilmService.class);
     private final LocalDate checkDate = LocalDate.of(1895, 12, 28);
     private static final DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
 
     public FilmDto createFilm(FilmDto filmDto) {
         Film film = filmStorage.save(mapToFilm(filmDto));
@@ -53,9 +49,8 @@ public class FilmService {
         return mapToFilDto(filmStorage.update(newFilm));
     }
 
-
-    public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+    public List<FilmDto> getAllFilms() {
+        return filmStorage.getAllFilms().stream().map(FilmService::mapToFilDto).collect(Collectors.toList());
     }
 
     public FilmDto getFilmById(Long filmID) {
@@ -75,6 +70,22 @@ public class FilmService {
         filmStorage.addLike(filmId, userId);
     }
 
+    public List<FilmDto> getCommonFilms(Long userId, Long friendId) {
+        if (!userService.contain(userId) || !userService.contain(friendId)) {
+            throw new UserNotFoundException("Пользователь с одним из идентификаторов не найден");
+        }
+
+        List<Film> userFilms = filmStorage.getFilmsByUserId(userId);
+        List<Film> friendFilms = filmStorage.getFilmsByUserId(friendId);
+
+        Set<Film> commonFilms = new HashSet<>(userFilms);
+        commonFilms.retainAll(friendFilms);
+
+        return commonFilms.stream()
+                .map(FilmService::mapToFilDto)
+                .collect(Collectors.toList());
+    }
+
     public void deleteLike(Long filmId, Long userId) {
         if (userId == null || !userService.contain(userId)) {
             throw new UserNotFoundException("Пользователя не может быть с пустым filmId");
@@ -86,34 +97,33 @@ public class FilmService {
         filmStorage.dislike(filmId, userId);
     }
 
-    public List<FilmDto> getPopularFilms(Integer count) {
-
-        return filmStorage.getPopularFilms(count).stream()
-                .map(FilmService::mapToFilDto)
-                .collect(Collectors.toList());
-    }
-
     public FullFilm getFilmWithGenre(Long filmId) {
         FilmDto filmDto = mapToFilDto(filmStorage.find(filmId)
                 .orElseThrow(() -> new FilmNotFoundException("Фильма с таким filmId не существует")));
 
         Mpa mpa = mpaService.getMpaById((long) filmDto.getMpa().getId());
 
-        List<ru.yandex.practicum.filmorate.dto.Genre> genres = Collections.emptyList();
+        List<Genre> genres = Collections.emptyList();
         if (filmDto.getGenres() != null && !filmDto.getGenres().isEmpty()) {
             Set<Long> genreIds = filmDto.getGenres().stream()
                     .map(genre -> (long) genre.getId())
                     .collect(Collectors.toSet());
 
-            List<ru.yandex.practicum.filmorate.dto.Genre> genreList = genreService.getGenresByIds(genreIds);
+            List<Genre> genreList = genreService.getGenresByIds(genreIds);
 
-            Map<Integer, ru.yandex.practicum.filmorate.dto.Genre> genreMap = genreList.stream()
-                    .collect(Collectors.toMap(ru.yandex.practicum.filmorate.dto.Genre::getId, genre -> genre));
+            Map<Integer, Genre> genreMap = genreList.stream()
+                    .collect(Collectors.toMap(Genre::getId, genre -> genre));
 
             genres = filmDto.getGenres().stream()
                     .map(x -> genreMap.get(x.getId()))
                     .filter(Objects::nonNull)
                     .toList();
+
+        }
+
+        List<Director> directors = Collections.emptyList();
+        if (filmDto.getDirectors() != null && !filmDto.getDirectors().isEmpty()) {
+            directors = directorService.getDirectorsByFilmId(filmId);
         }
 
         return FullFilm.builder()
@@ -124,9 +134,22 @@ public class FilmService {
                 .mpa(mpa)
                 .releaseDate(filmDto.getReleaseDate())
                 .genres(genres)
+                .directors(directors)
                 .build();
     }
 
+    public boolean contain(Long filmId) {
+        return filmStorage.existById(filmId);
+    }
+
+    public List<FilmDto> getRecommendation(Long userId) {
+        if (userId == null || !userService.contain(userId)) {
+            throw new UserNotFoundException("Пользователя не может быть с пустым filmId");
+        }
+        return filmStorage.getRecommendations(userId).stream()
+                .map(FilmService::mapToFilDto)
+                .collect(Collectors.toList());
+    }
 
     private Film mapToFilm(FilmDto filmDto) {
         LocalDate date = LocalDate.parse(filmDto.getReleaseDate(), formater);
@@ -136,19 +159,20 @@ public class FilmService {
         Duration duration = Duration.ofMinutes(filmDto.getDuration());
 
         if (filmDto.getMpa() == null) {
-            throw new MpaNotExistException("Рейтинг не может быть путсым");
+            throw new MpaNotExistException("Рейтинг не может быть пустым");
         }
-        if (filmDto.getGenres() == null) {
-            return Film.builder()
-                    .id(filmDto.getId())
-                    .description(filmDto.getDescription())
-                    .duration(duration)
-                    .title(filmDto.getName())
-                    .releaseDate(date)
-                    .mpa(filmDto.getMpa().getId())
-                    .build();
+        List<Genre> genres;
+        if (filmDto.getGenres() == null || filmDto.getGenres().isEmpty()) {
+            genres = null;
+        } else {
+            genres = filmDto.getGenres().stream().distinct().collect(Collectors.toList());
         }
-
+        List<Director> directors;
+        if (filmDto.getDirectors() == null || filmDto.getDirectors().isEmpty()) {
+            directors = null;
+        } else {
+            directors = filmDto.getDirectors();
+        }
 
         return Film.builder()
                 .id(filmDto.getId())
@@ -156,23 +180,24 @@ public class FilmService {
                 .duration(duration)
                 .title(filmDto.getName())
                 .releaseDate(date)
-                .mpa(filmDto.getMpa().getId())
-                .genres(filmDto.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()).stream().toList())
+                .mpa(filmDto.getMpa())
+                .genres(genres)
+                .directors(directors)
                 .build();
     }
 
-
     private static FilmDto mapToFilDto(Film film) {
-
-        if (film.getGenres() == null) {
-            return FilmDto.builder()
-                    .id(film.getId())
-                    .description(film.getDescription())
-                    .name(film.getTitle())
-                    .releaseDate(film.getReleaseDate().format(formater))
-                    .duration(film.getDuration().getSeconds() / 60)
-                    .mpa(new MpaRating(film.getMpa()))
-                    .build();
+        List<Genre> genres;
+        if (film.getGenres() == null || film.getGenres().isEmpty()) {
+            genres = Collections.emptyList();
+        } else {
+            genres = film.getGenres().stream().distinct().collect(Collectors.toList());
+        }
+        List<Director> directors;
+        if (film.getDirectors() == null || film.getDirectors().isEmpty()) {
+            directors = Collections.emptyList();
+        } else {
+            directors = film.getDirectors();
         }
 
         return FilmDto.builder()
@@ -181,10 +206,68 @@ public class FilmService {
                 .name(film.getTitle())
                 .releaseDate(film.getReleaseDate().format(formater))
                 .duration(film.getDuration().getSeconds() / 60)
-                .mpa(new MpaRating(film.getMpa()))
-                .genres(film.getGenres().stream().map(Genre::new).collect(Collectors.toList()))
+                .mpa(film.getMpa())
+                .genres(genres)
+                .directors(directors)
                 .build();
     }
 
+    public List<FilmDto> getFilmsByDirectorId(Long directorId, String sortBy) {
+        if (!directorService.existDirector(directorId)) {
+            throw new DirectorNotExistException("Директор с id " + directorId + " не найден");
+        }
+        if (sortBy.equals("year")) {
+            return filmStorage.getDirectorFilmSortByYear(directorId).stream()
+                    .map(FilmService::mapToFilDto)
+                    .collect(Collectors.toList());
+        } else if (sortBy.equals("likes")) {
+            return filmStorage.getDirectorFilmSortByLikes(directorId).stream()
+                    .map(FilmService::mapToFilDto)
+                    .collect(Collectors.toList());
+        } else {
+            throw new SortByNotCorrectException(
+                    "Выберите сортировку или по году или по количеству лайков year,likes()"
+            );
+        }
+    }
 
+    public List<FilmDto> getPopularFilms(Integer count, Integer genreId, Integer year) {
+        return filmStorage.getPopularFilms(count, genreId, year).stream()
+                .map(FilmService::mapToFilDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<FilmDto> getFilmsByNameOrDirector(String query, List<String> by) {
+        if (query == null || by == null || by.size() > 2) {
+            throw new IllegalArgumentException("Некорректные параметры поиска!");
+        }
+        if (by.size() == 1) {
+            if (by.contains("title")) {
+                return filmStorage.getFilmsByName(query)
+                        .stream()
+                        .map(FilmService::mapToFilDto)
+                        .collect(Collectors.toList());
+            } else if (by.contains("director")) {
+                return filmStorage.getFilmsByDirector(query)
+                        .stream()
+                        .map(FilmService::mapToFilDto)
+                        .collect(Collectors.toList());
+            } else {
+                throw new IllegalArgumentException(
+                        "Некорректные параметры поиска! Ожидается одно из полей: title, director"
+                );
+            }
+        } else {
+            return filmStorage.getFilmsByNameAndDirector(query)
+                    .stream()
+                    .map(FilmService::mapToFilDto)
+                    .collect(Collectors.toList());
+        }
+    }
+
+
+    public void deleteFilmById(Long filmId) {
+        filmStorage.deleteFilmById(filmId);
+    }
 }
+

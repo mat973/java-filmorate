@@ -1,13 +1,15 @@
 package ru.yandex.practicum.filmorate.storage.user.UserStorageImpl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exeption.UserAddFriendException;
-import ru.yandex.practicum.filmorate.exeption.UserDeleteFriendException;
+import ru.yandex.practicum.filmorate.exception.UserAddFriendException;
+import ru.yandex.practicum.filmorate.exception.UserDeleteFriendException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -16,6 +18,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component("user-bd")
 public class UserDbStorage implements UserStorage {
@@ -44,9 +47,8 @@ public class UserDbStorage implements UserStorage {
             WHERE (f.user_id = ? OR (f.friend_id = ? AND confirmed = TRUE))
             AND u.user_id != ?
             """;
-
-
     private static final String CHECK_FRIEND_QUERY = "SELECT confirmed FROM friends WHERE (user_id = ? AND friend_id = ?)";
+    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE user_id = ?";
 
     public List<User> getAllUsers() {
         return jdbc.query(FIND_ALL_QUERY, mapper);
@@ -60,12 +62,10 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-
     @Override
     public Boolean existById(Long userId) {
         return Boolean.TRUE.equals(jdbc.queryForObject(EXIST_BY_ID_QUERY, Boolean.class, userId));
     }
-
 
     public User save(User user) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
@@ -82,12 +82,10 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
-
     public User update(User user) {
         jdbc.update(UPDATE_QUERY, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         return user;
     }
-
 
     @Override
     public void addFriendById(Long userId, Long friendId) {
@@ -136,12 +134,21 @@ public class UserDbStorage implements UserStorage {
         return jdbc.query(GET_FRIENDS_QUERY, mapper, userId, userId, userId);
     }
 
-
     private Optional<Boolean> isFriend(Long userId, Long friendId) {
         try {
-            return Optional.ofNullable(jdbc.queryForObject(CHECK_FRIEND_QUERY, Boolean.class, userId, friendId));
+            return Optional.of(jdbc.queryForObject(CHECK_FRIEND_QUERY, Boolean.class, userId, friendId));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
+        }
+    }
+
+    @Override
+    public void deleteUserById(Long userId) {
+        if (existById(userId)) {
+            jdbc.update(DELETE_USER_QUERY, userId);
+            log.info("Пользователь с id = {} удален", userId);
+        } else {
+            throw new UserNotFoundException("Пользователь с id = " + userId + " не найден");
         }
     }
 }
