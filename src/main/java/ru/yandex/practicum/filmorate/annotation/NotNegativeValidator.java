@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.annotation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import ru.yandex.practicum.filmorate.exception.NotNegativeIdException;
+
 
 public class NotNegativeValidator implements ConstraintValidator<NotNegative, Long> {
 
@@ -17,9 +17,6 @@ public class NotNegativeValidator implements ConstraintValidator<NotNegative, Lo
         if (aLong == null) {
             return true;
         }
-        if (aLong < 0L) {
-            throw new NotNegativeIdException("id не может быть меньше 0");
-        }
-        return true;
+        return aLong > 0L;
     }
 }

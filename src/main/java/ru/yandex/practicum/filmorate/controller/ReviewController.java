@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.service.ReviewService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/reviews")
@@ -59,14 +58,12 @@ public class ReviewController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Review> getReviews(@RequestParam Optional<Long> filmId, @RequestParam Optional<Long> count) {
-        log.info("Вывод комментариев по входным критериям");
-        Long fId;
-        Long amount;
-        fId = filmId.orElse(-1L);
-
-        amount = count.orElse(10L);
-        return reviewService.getReviews(fId, amount);
+    public List<Review> getReviews(
+            @RequestParam(name = "filmId", required = false, defaultValue = "-1") Long filmId,
+            @RequestParam(name = "count", required = false, defaultValue = "10") Long count
+    ) {
+        log.info("Вывод комментариев по входным критериям: filmId={}, count={}", filmId, count);
+        return reviewService.getReviews(filmId, count);
     }
 
     @PutMapping("/{reviewId}/like/{userId}")
