@@ -82,8 +82,8 @@ public class FilmDbStorage implements FilmStorage {
             WHERE f.FILM_ID = ?
             GROUP BY f.film_id
             """;
-    private static final String SET_LIKE_QUERY = "MERGE INTO FILM_LIKES (USER_ID, FILM_ID) KEY (USER_ID, FILM_ID) VALUES (?, ?);";
-    private static final String SET_DISLIKE_QUERY = "DELETE FROM FILM_LIKES WHERE user_id = ? AND FILM_ID = ?";
+    private static final String SET_LIKE_QUERY = "MERGE INTO film_scope (USER_ID, FILM_ID) KEY (USER_ID, FILM_ID) VALUES (?, ?);";
+    private static final String SET_DISLIKE_QUERY = "DELETE FROM film_scope WHERE user_id = ? AND FILM_ID = ?";
     private static final String GET_POPULAR_FILMS_QUERY = """
             SELECT
                 f.film_id,
@@ -101,7 +101,7 @@ public class FilmDbStorage implements FilmStorage {
             LEFT JOIN ratings r ON f.rating_id = r.rating_id
             LEFT JOIN film_genre fg ON f.film_id = fg.film_id
             LEFT JOIN genre g ON g.genre_id = fg.genre_id
-            LEFT JOIN film_likes fl ON fl.film_id = f.film_id
+            LEFT JOIN film_scope fl ON fl.film_id = f.film_id
             LEFT JOIN director_film df ON df.film_id = f.film_id
             LEFT JOIN director d ON d.director_id = df.director_id
             WHERE
@@ -114,91 +114,90 @@ public class FilmDbStorage implements FilmStorage {
                 f.film_id ASC
             LIMIT ?
             """;
-
     private static final String EXIST_BY_ID_QUERY = "SELECT COUNT(*) > 0 FROM films WHERE film_id = ?";
     private static final String EXIST_MPA_BY_ID_QUERY = "SELECT COUNT(*) FROM ratings WHERE rating_id = ?";
     private static final String EXIST_GENRE_BY_ID_QUERY = "SELECT COUNT(*)  FROM genre where genre_id = ?";
     private static final String GET_RECOMMENDATION_QUERY = """
-            SELECT\s
-              f.film_id,\s
-              f.title,\s
-              f.description,\s
-              f.release_date,\s
-              f.duration,\s
-              f.rating_id,\s
+            SELECT
+              f.film_id,
+              f.title,
+              f.description,
+              f.release_date,
+              f.duration,
+              f.rating_id,
               r.name AS rating_name,
-              STRING_AGG(fg.genre_id, ',') AS genres,\s
+              STRING_AGG(fg.genre_id, ',') AS genres,
               STRING_AGG(g.name, ',') AS genres_name,
               STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
               STRING_AGG(d.NAME, ',') AS directors_name
-            FROM\s
-              films f\s
-              LEFT JOIN ratings r ON f.rating_id = r.rating_id\s
-              LEFT JOIN film_genre fg ON f.film_id = fg.film_id\s
+            FROM
+              films f
+              LEFT JOIN ratings r ON f.rating_id = r.rating_id
+              LEFT JOIN film_genre fg ON f.film_id = fg.film_id
               LEFT JOIN GENRE g on g.genre_id = fg.genre_id
-              LEFT JOIN film_likes fl ON fl.film_id = f.film_id\s
+              LEFT JOIN film_scope fl ON fl.film_id = f.film_id
               LEFT JOIN DIRECTOR_FILM df ON df.FILM_ID = f.FILM_ID
               LEFT JOIN DIRECTOR d ON d.DIRECTOR_ID = df.DIRECTOR_ID
-            WHERE\s
+            WHERE
               f.film_id IN (
-                SELECT\s
-                  fl.film_id\s
-                FROM\s
-                  FILM_LIKES fl\s
-                WHEre\s
+                SELECT
+                  fl.film_id
+                FROM
+                  film_scope fl
+                WHERE
                   fl.user_id IN (
-                    SELECT\s
-                      fl1.USER_ID\s
-                    FROM\s
-                      FILM_LIKES fl\s
-                      LEFT JOIN FILM_LIKES fl1 ON fl.FILM_ID = fl1.FILM_ID\s
-                    WHERE\s
-                      fl.USER_ID = ?\s
-                      AND fl1.USER_ID <> ?\s
-                    GROUP BY\s
-                      fl1.USER_ID\s
-                    ORDER BY\s
-                      count(*) DESC\s
-                    LIMIT\s
+                    SELECT
+                      fl1.USER_ID
+                    FROM
+                      film_scope fl
+                      LEFT JOIN film_scope fl1 ON fl.FILM_ID = fl1.FILM_ID
+                    WHERE
+                      fl.USER_ID = ?
+                      AND fl1.USER_ID <> ?
+                    GROUP BY
+                      fl1.USER_ID
+                    ORDER BY
+                      count(*) DESC
+                    LIMIT
                       1
                   ) AND fl.FILM_ID NOT IN (
-                    SELECT\s
-                      fl.film_id\s
-                    FROM\s
-                      FILM_LIKES fl\s
-                    WHERE\s
+                    SELECT
+                      fl.film_id
+                    FROM
+                      film_scope fl
+                    WHERE
                       fl.user_id = ?
                   )
-              )\s
-            GROUP BY\s
-              f.film_id\s
-            ORDER BY\s
-              COUNT(fl.user_id) DESC,\s
+              )
+            GROUP BY
+              f.film_id
+            ORDER BY
+              COUNT(fl.user_id) DESC,
               f.film_id ASC
             """;
     private static final String GET_COMMON_FILMS_QUERY = """
             SELECT
-            f.film_id,
-            f.title,
-            f.description,
-            f.release_date,
-            f.duration,
-            f.rating_id,
-            r.name AS rating_name,
-            STRING_AGG(fg.genre_id, ',') AS genres,
-            STRING_AGG(g.name, ',') AS genres_name,
-            STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
-            STRING_AGG(d.NAME, ',') AS directors_name
+              f.film_id,
+              f.title,
+              f.description,
+              f.release_date,
+              f.duration,
+              f.rating_id,
+              r.name AS rating_name,
+              STRING_AGG(fg.genre_id, ',') AS genres,
+              STRING_AGG(g.name, ',') AS genres_name,
+              STRING_AGG(df.DIRECTOR_ID, ',') AS directors,
+              STRING_AGG(d.NAME, ',') AS directors_name
             FROM films f
             JOIN ratings r ON f.rating_id = r.rating_id
             LEFT JOIN director_film df ON f.film_id = df.film_id
             LEFT JOIN film_genre fg ON f.film_id = fg.film_id
             LEFT JOIN GENRE g on g.genre_id = fg.genre_id
-            LEFT JOIN film_likes fl ON f.film_id = fl.film_id
+            LEFT JOIN film_scope fl ON f.film_id = fl.film_id
             LEFT JOIN DIRECTOR d ON d.DIRECTOR_ID = df.DIRECTOR_ID
-             WHERE fl.USER_ID = ?
-             GROUP BY
-             f.film_id
+            WHERE fl.USER_ID = ?
+            GROUP BY
+              f.film_id
             """;
     private static final String GET_DIRECTORS_FILM_SORT_BY_YEAR = """
             SELECT\s
@@ -246,7 +245,7 @@ public class FilmDbStorage implements FilmStorage {
               JOIN director_film df ON f.film_id = df.film_id\s
               LEFT JOIN film_genre fg ON f.film_id = fg.film_id\s
               LEFT JOIN GENRE g on g.genre_id = fg.genre_id
-              LEFT JOIN film_likes fl ON f.film_id = fl.film_id\s
+              LEFT JOIN film_scope fl ON f.film_id = fl.film_id\s
               LEFT JOIN DIRECTOR d ON d.DIRECTOR_ID = df.DIRECTOR_ID
             WHERE\s
               df.director_id = ?\s
@@ -404,7 +403,6 @@ public class FilmDbStorage implements FilmStorage {
             return Optional.empty();
         }
     }
-
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         try {

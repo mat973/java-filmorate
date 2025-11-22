@@ -34,10 +34,11 @@ create table IF NOT EXISTS  films (
     rating_id SMALLINT REFERENCES ratings (rating_id)
 );
 
--- Таблица лайков фильмов
-create table IF NOT EXISTS film_likes (
+-- Таблица оценок фильмов
+create table IF NOT EXISTS film_scope (
     user_id bigint REFERENCES users (user_id) ON DELETE CASCADE,
     film_id bigint REFERENCES films (film_id) ON DELETE CASCADE,
+    scope INT CHECK (scope >= 1 AND scope <= 10),
     PRIMARY KEY (user_id, film_id)
 );
 
@@ -98,12 +99,12 @@ create table if not EXISTS  director (
     name varchar(200) NOT NULL
 );
 
+--Таблица связь фильмов и режиссеров
 create table if NOT EXISTS director_film(
     director_id bigint REFERENCES director (director_id) ON DELETE CASCADE,
     film_id bigint REFERENCES films (film_id) ON DELETE CASCADE,
     PRIMARY KEY (director_id, film_id)
 );
-
 
 --Таблица событий
 create table  if not exists user_event(
@@ -114,4 +115,3 @@ create table  if not exists user_event(
      entity_id bigint,
  time_stamp timestamp Default CURRENT_TIMESTAMP
  );
-
